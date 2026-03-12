@@ -1,0 +1,27 @@
+server:
+  port: 8082
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: hr-service
+          uri: lb://HR-SERVICE
+          predicates:
+            - Path=/api/employees/**
+        - id: mission-service
+          uri: lb://MISSION-SERVICE
+          predicates:
+            - Path=/mission/**
+        - id: message-router
+          uri: lb://MESSAGE-ROUTER
+          predicates:
+            - Path=/api/messages/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

@@ -1,0 +1,14 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          spring-boot-client:
+            client-id: spring-boot-client
+            client-secret: ASXwzdPnBexUvwE1B7dUal05QOXiOP9L
+            authorization-grant-type: client_credentials
+            scope: ""
+            provider: keycloak
+        provider:
+          keycloak:
+            token-uri: http://localhost:8081/realms/spring-app/protocol/openid-connect/token
