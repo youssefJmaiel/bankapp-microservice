@@ -1,0 +1,719 @@
+----------------------------------START FFST------------------------------------
+/home/youssef/workspace/message-router/FFDC/JMSCC2122.FDC PID:20121
+
+                                    IBM MQ classes for JMS and Java (AllClient packaging) First Failure Symptom Report
+                                            
+
+Product          :- IBM MQ classes for JMS and Java (AllClient packaging)
+Date/Time        :- Sat Dec 28 01:13:07 CET 2024
+System time      :- 1735344787942
+Operating System :- Linux
+UserID           :- youssef
+Java Vendor      :- Ubuntu
+Java Version     :- 11.0.25+9-post-Ubuntu-1ubuntu120.04
+
+Source Class     :- com.ibm.mq.jmqi.local.LocalServer
+Source Method    :- checkSize
+ProbeID          :- 01
+Thread           :- name=main priority=5 group=main ccl=org.springframework.boot.loader.LaunchedURLClassLoader@2b71fc7e
+
+                                      Data
+                                      ----
+
+|   CmdLevel     :-  920
+|   Description  :-  MQ Structure size check, missing item
+|   name         :-  index:19   SpiGetOptions.p version:4
+|   nativeSize   :-  56
+
+                              Version information
+                              -------------------
+
+IBM MQ JMS Provider
+9.4.0.0
+p940-L240605.1
+Production
+Component Title: IBM MQ JMS Provider
+Component Name:  com.ibm.msg.client.wmq
+Version:         9.4.0.0
+Class Name:      class com.ibm.msg.client.wmq.factories.WMQComponent
+CMVC:            p940-L240605.1
+mqjbnd level:    p920-L200710.TRIAL
+Jar location:    file:/home/youssef/workspace/message-router/target/message-router-0.0.1-SNAPSHOT.jar
+Factory Class:   class com.ibm.msg.client.wmq.factories.WMQFactoryFactory
+
+Common Services for Java Platform, Standard Edition
+9.4.0.0
+p940-L240605.1
+Production
+Component Title: Common Services for Java Platform, Standard Edition
+Component Name:  com.ibm.msg.client.commonservices.j2se
+Version:         9.4.0.0
+Class Name:      class com.ibm.msg.client.commonservices.j2se.J2SEComponent
+CMVC:            p940-L240605.1
+Jar location:    file:/home/youssef/workspace/message-router/target/message-router-0.0.1-SNAPSHOT.jar
+Factory Class:   class com.ibm.msg.client.commonservices.j2se.CommonServicesImplementation
+
+Java Message Service Client
+9.4.0.0
+p940-L240605.1
+Production
+Component Title: Java Message Service Client
+Component Name:  com.ibm.msg.client.jms
+Version:         9.4.0.0
+Class Name:      class com.ibm.msg.client.jms.internal.JMSComponent
+CMVC:            p940-L240605.1
+Jar location:    file:/home/youssef/workspace/message-router/target/message-router-0.0.1-SNAPSHOT.jar
+Factory Class:   null
+
+IBM MQ classes for Java Message Service
+9.4.0.0
+p940-L240605.1
+Production
+Component Title: IBM MQ classes for Java Message Service
+Component Name:  com.ibm.mq.jms
+Version:         9.4.0.0
+Class Name:      class com.ibm.mq.jms.MQJMSComponent
+CMVC:            p940-L240605.1
+Jar location:    file:/home/youssef/workspace/message-router/target/message-router-0.0.1-SNAPSHOT.jar
+Factory Class:   null
+
+IBM MQ classes for Java
+9.4.0.0
+p940-L240605.1
+Production
+Component Title: IBM MQ classes for Java
+Component Name:  com.ibm.mq
+Version:         9.4.0.0
+Class Name:      class com.ibm.mq.MQJavaComponent
+CMVC:            p940-L240605.1
+Jar location:    file:/home/youssef/workspace/message-router/target/message-router-0.0.1-SNAPSHOT.jar
+Factory Class:   null
+
+
+
+                                  Stack trace
+                                  -----------
+
+Stack trace to show the location of the FFST call
+|   FFST Location  :-  java.lang.Exception
+|   	at com.ibm.msg.client.commonservices.trace.Trace.getCurrentPosition(Trace.java:2186)
+|   	at com.ibm.msg.client.commonservices.trace.Trace.createFFSTString(Trace.java:2093)
+|   	at com.ibm.msg.client.commonservices.trace.Trace.ffstInternal(Trace.java:1957)
+|   	at com.ibm.msg.client.commonservices.trace.Trace.ffst(Trace.java:1762)
+|   	at com.ibm.mq.jmqi.local.LocalMQ.checkSize(LocalMQ.java:655)
+|   	at com.ibm.mq.jmqi.local.LocalMQ.initialise_inner(LocalMQ.java:514)
+|   	at com.ibm.mq.jmqi.local.LocalMQ.initialise(LocalMQ.java:224)
+|   	at com.ibm.mq.jmqi.local.LocalMQ.<init>(LocalMQ.java:1250)
+|   	at com.ibm.mq.jmqi.local.LocalServer.<init>(LocalServer.java:230)
+|   	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+|   	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+|   	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+|   	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:490)
+|   	at com.ibm.mq.jmqi.JmqiEnvironment.getInstance(JmqiEnvironment.java:765)
+|   	at com.ibm.mq.jmqi.JmqiEnvironment.getMQI(JmqiEnvironment.java:699)
+|   	at com.ibm.mq.MQSESSION.<init>(MQSESSION.java:2062)
+|   	at com.ibm.mq.MQSESSION.getSession(MQSESSION.java:2109)
+|   	at com.ibm.mq.MQManagedConnectionJ11.<init>(MQManagedConnectionJ11.java:209)
+|   	at com.ibm.mq.MQBindingsManagedConnectionFactoryJ11._createManagedConnection(MQBindingsManagedConnectionFactoryJ11.java:190)
+|   	at com.ibm.mq.MQBindingsManagedConnectionFactoryJ11.createManagedConnection(MQBindingsManagedConnectionFactoryJ11.java:236)
+|   	at com.ibm.mq.StoredManagedConnection.<init>(StoredManagedConnection.java:97)
+|   	at com.ibm.mq.MQSimpleConnectionManager.allocateConnection(MQSimpleConnectionManager.java:194)
+|   	at com.ibm.mq.MQQueueManagerFactory.obtainBaseMQQueueManager(MQQueueManagerFactory.java:870)
+|   	at com.ibm.mq.MQQueueManagerFactory.procure(MQQueueManagerFactory.java:818)
+|   	at com.ibm.mq.MQQueueManagerFactory.constructQueueManager(MQQueueManagerFactory.java:760)
+|   	at com.ibm.mq.MQQueueManagerFactory.createQueueManager(MQQueueManagerFactory.java:200)
+|   	at com.ibm.mq.MQQueueManager.<init>(MQQueueManager.java:893)
+|   	at com.bankapp.messagerouter.service.MqService.sendMessage(MqService2.java:35)
+|   	at com.bankapp.messagerouter.MessageRouterApplication.lambda$run$0(MessageRouterApplication.java:27)
+|   	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:765)
+|   	at org.springframework.boot.SpringApplication.lambda$callRunners$2(SpringApplication.java:749)
+|   	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
+|   	at java.base/java.util.stream.SortedOps$SizedRefSortingSink.end(SortedOps.java:357)
+|   	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:485)
+|   	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)
+|   	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
+|   	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
+|   	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+|   	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:497)
+|   	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:744)
+|   	at org.springframework.boot.SpringApplication.run(SpringApplication.java:315)
+|   	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1300)
+|   	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1289)
+|   	at com.bankapp.messagerouter.MessageRouterApplication.main(MessageRouterApplication.java:20)
+|   	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+|   	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+|   	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+|   	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+|   	at org.springframework.boot.loader.MainMethodRunner.run(MainMethodRunner.java:49)
+|   	at org.springframework.boot.loader.Launcher.launch(Launcher.java:108)
+|   	at org.springframework.boot.loader.Launcher.launch(Launcher.java:58)
+|   	at org.springframework.boot.loader.JarLauncher.main(JarLauncher.java:65)
+|   
+
+                            Property Store Contents
+                            -----------------------
+
+All currently set properties
+|   CONSOLE_LOG_CHARSET                     :-  UTF-8
+|   FILE_LOG_CHARSET                        :-  UTF-8
+|   PID                                     :-  20121
+|   awt.toolkit                             :-  sun.awt.X11.XToolkit
+|   catalina.base                           :-  /tmp/tomcat.8080.18005683068788078137
+|   catalina.home                           :-  /tmp/tomcat.8080.18005683068788078137
+|   catalina.useNaming                      :-  false
+|   com.zaxxer.hikari.pool_number           :-  1
+|   file.encoding                           :-  UTF-8
+|   file.separator                          :-  /
+|   java.awt.graphicsenv                    :-  sun.awt.X11GraphicsEnvironment
+|   java.awt.headless                       :-  true
+|   java.awt.printerjob                     :-  sun.print.PSPrinterJob
+|   java.class.path                         :-  /home/youssef/workspace/message-router/target/message-router-0.0.1-SNAPSHOT.jar
+|   java.class.version                      :-  55.0
+|   java.home                               :-  /usr/lib/jvm/java-11-openjdk-amd64
+|   java.io.tmpdir                          :-  /tmp
+|   java.library.path                       :-  /opt/mqm/java/lib64:/opt/mqm/java/lib
+|   java.protocol.handler.pkgs              :-  org.springframework.boot.loader
+|   java.runtime.name                       :-  OpenJDK Runtime Environment
+|   java.runtime.version                    :-  11.0.25+9-post-Ubuntu-1ubuntu120.04
+|   java.specification.maintenance.version  :-  3
+|   java.specification.name                 :-  Java Platform API Specification
+|   java.specification.vendor               :-  Oracle Corporation
+|   java.specification.version              :-  11
+|   java.vendor                             :-  Ubuntu
+|   java.vendor.url                         :-  https://ubuntu.com/
+|   java.vendor.url.bug                     :-  https://bugs.launchpad.net/ubuntu/+source/openjdk-lts
+|   java.version                            :-  11.0.25
+|   java.version.date                       :-  2024-10-15
+|   java.vm.compressedOopsMode              :-  Zero based
+|   java.vm.info                            :-  mixed mode, sharing
+|   java.vm.name                            :-  OpenJDK 64-Bit Server VM
+|   java.vm.specification.name              :-  Java Virtual Machine Specification
+|   java.vm.specification.vendor            :-  Oracle Corporation
+|   java.vm.specification.version           :-  11
+|   java.vm.vendor                          :-  Ubuntu
+|   java.vm.version                         :-  11.0.25+9-post-Ubuntu-1ubuntu120.04
+|   jdk.debug                               :-  release
+|   line.separator                          :-  
+|   
+|   os.arch                                 :-  amd64
+|   os.name                                 :-  Linux
+|   os.version                              :-  5.15.0-127-generic
+|   path.separator                          :-  :
+|   spring.beaninfo.ignore                  :-  true
+|   sun.arch.data.model                     :-  64
+|   sun.boot.library.path                   :-  /usr/lib/jvm/java-11-openjdk-amd64/lib
+|   sun.cpu.endian                          :-  little
+|   sun.cpu.isalist                         :-  
+|   sun.desktop                             :-  gnome
+|   sun.io.unicode.encoding                 :-  UnicodeLittle
+|   sun.java.command                        :-  /home/youssef/workspace/message-router/target/message-router-0.0.1-SNAPSHOT.jar
+|   sun.java.launcher                       :-  SUN_STANDARD
+|   sun.jnu.encoding                        :-  UTF-8
+|   sun.management.compiler                 :-  HotSpot 64-Bit Tiered Compilers
+|   sun.os.patch.level                      :-  unknown
+|   user.country                            :-  FR
+|   user.dir                                :-  /home/youssef/workspace/message-router
+|   user.home                               :-  /home/youssef
+|   user.language                           :-  fr
+|   user.name                               :-  youssef
+|   user.timezone                           :-  Africa/Tunis
+
+                           WorkQueueMananger Contents
+                           --------------------------
+
+|   Current ThreadPool size      :-  0
+|   Maintain ThreadPool size     :-  false
+|   Maximum ThreadPool size      :-  -1
+|   ThreadPool inactive timeout  :-  0
+
+                               Runtime properties
+                               ------------------
+
+|   Available processors         :-  12
+|   Free memory in bytes (now)   :-  261184216
+|   Max memory in bytes          :-  4133486592
+|   Total memory in bytes (now)  :-  397410304
+
+                           Component Manager Contents
+                           --------------------------
+
+Common Services Components:
+|   CMVC             :-  p940-L240605.1
+|   Class Name       :-  class com.ibm.msg.client.commonservices.j2se.J2SEComponent
+|   Component Name   :-  com.ibm.msg.client.commonservices.j2se
+|   Component Title  :-  Common Services for Java Platform, Standard Edition
+|   Factory Class    :-  class com.ibm.msg.client.commonservices.j2se.CommonServicesImplementation
+|   Jar location     :-  file:/home/youssef/workspace/message-router/target/message-router-0.0.1-SNAPSHOT.jar
+|   Version          :-  9.4.0.0
+
+Messaging Provider Components:
+|   CMVC             :-  p940-L240605.1
+|   Class Name       :-  class com.ibm.msg.client.wmq.factories.WMQComponent
+|   Component Name   :-  com.ibm.msg.client.wmq
+|   Component Title  :-  IBM MQ JMS Provider
+|   Factory Class    :-  class com.ibm.msg.client.wmq.factories.WMQFactoryFactory
+|   Jar location     :-  file:/home/youssef/workspace/message-router/target/message-router-0.0.1-SNAPSHOT.jar
+|   Version          :-  9.4.0.0
+|   mqjbnd level     :-  p920-L200710.TRIAL
+
+
+
+
+                         Provider Specific Information
+                         -----------------------------
+
+Overview of JMS System
+Num. Contexts    : 0
+Num. Connections : 0
+Num. Sessions    : 0
+Num. Consumers   : 0
+Num. Producers   : 0
+
+Detailed JMS System Information
+Contexts      : 
+Connections      : 
+Sessions         : 
+Consumers        : 
+Producers        : 
+
+All Thread Information
+
+                          Name : http-nio-8080-exec-1
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 29
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:141)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:33)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1114)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1176)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : http-nio-8080-exec-3
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 31
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:141)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:33)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1114)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1176)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : container-0
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 25
+                         State : TIMED_WAITING
+                         Stack : java.lang.Thread.sleep(Thread.java:-2)
+                               : org.apache.catalina.core.StandardServer.await(StandardServer.java:568)
+                               : org.springframework.boot.web.embedded.tomcat.TomcatWebServer$1.run(TomcatWebServer.java:197)
+
+                          Name : http-nio-8080-exec-6
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 34
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:141)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:33)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1114)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1176)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : H2 TCP Server (tcp://127.0.1.1:40001)
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 19
+                         State : RUNNABLE
+                         Stack : java.net.PlainSocketImpl.socketAccept(PlainSocketImpl.java:-2)
+                               : java.net.AbstractPlainSocketImpl.accept(AbstractPlainSocketImpl.java:474)
+                               : java.net.ServerSocket.implAccept(ServerSocket.java:565)
+                               : java.net.ServerSocket.accept(ServerSocket.java:533)
+                               : org.h2.server.TcpServer.listen(TcpServer.java:254)
+                               : org.h2.tools.Server.run(Server.java:620)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : http-nio-8080-exec-9
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 37
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:141)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:33)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1114)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1176)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : http-nio-8080-exec-5
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 33
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:141)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:33)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1114)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1176)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : H2-serialization
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 27
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+                               : java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+                               : java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : http-nio-8080-exec-2
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 30
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:141)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:33)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1114)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1176)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : HikariPool-1 connection adder
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 26
+                         State : TIMED_WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:234)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2123)
+                               : java.util.concurrent.LinkedBlockingQueue.poll(LinkedBlockingQueue.java:458)
+                               : java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1053)
+                               : java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+                               : java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : Finalizer
+                      Priority : 8
+                   ThreadGroup : java.lang.ThreadGroup[name=system,maxpri=10]
+                            ID : 3
+                         State : WAITING
+                         Stack : java.lang.Object.wait(Object.java:-2)
+                               : java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155)
+                               : java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:176)
+                               : java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:170)
+
+                          Name : Signal Dispatcher
+                      Priority : 9
+                   ThreadGroup : java.lang.ThreadGroup[name=system,maxpri=10]
+                            ID : 4
+                         State : RUNNABLE
+
+                          Name : Catalina-utility-2
+                      Priority : 1
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 24
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1177)
+                               : java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:899)
+                               : java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+                               : java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+                               : java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : Catalina-utility-1
+                      Priority : 1
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 23
+                         State : TIMED_WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:234)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2123)
+                               : java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1182)
+                               : java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:899)
+                               : java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+                               : java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+                               : java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : MVStore background writer /home/youssef/mydb.mv.db
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 21
+                         State : TIMED_WAITING
+                         Stack : java.lang.Object.wait(Object.java:-2)
+                               : org.h2.mvstore.MVStore$BackgroundWriterThread.run(MVStore.java:3768)
+
+                          Name : HikariPool-1 housekeeper
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 22
+                         State : TIMED_WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:234)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2123)
+                               : java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1182)
+                               : java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:899)
+                               : java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+                               : java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+                               : java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : H2-save
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 28
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+                               : java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+                               : java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : http-nio-8080-Poller
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 39
+                         State : RUNNABLE
+                         Stack : sun.nio.ch.EPoll.wait(EPoll.java:-2)
+                               : sun.nio.ch.EPollSelectorImpl.doSelect(EPollSelectorImpl.java:120)
+                               : sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:124)
+                               : sun.nio.ch.SelectorImpl.select(SelectorImpl.java:136)
+                               : org.apache.tomcat.util.net.NioEndpoint$Poller.run(NioEndpoint.java:812)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : http-nio-8080-exec-8
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 36
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:141)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:33)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1114)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1176)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : JMSCCThreadPoolMaster
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 41
+                         State : WAITING
+                         Stack : java.lang.Object.wait(Object.java:-2)
+                               : java.lang.Object.wait(Object.java:328)
+                               : com.ibm.msg.client.commonservices.j2se.workqueue.WorkQueueManagerImplementation$WorkQueueManagerThread.waitForNotification(WorkQueueManagerImplementation.java:678)
+                               : com.ibm.msg.client.commonservices.j2se.workqueue.WorkQueueManagerImplementation$WorkQueueManagerThread.waitForNotification(WorkQueueManagerImplementation.java:648)
+                               : com.ibm.msg.client.commonservices.j2se.workqueue.WorkQueueManagerImplementation$WorkQueueManagerThread.run(WorkQueueManagerImplementation.java:918)
+
+                          Name : Reference Handler
+                      Priority : 10
+                   ThreadGroup : java.lang.ThreadGroup[name=system,maxpri=10]
+                            ID : 2
+                         State : RUNNABLE
+                         Stack : java.lang.ref.Reference.waitForReferencePendingList(Reference.java:-2)
+                               : java.lang.ref.Reference.processPendingReferences(Reference.java:241)
+                               : java.lang.ref.Reference$ReferenceHandler.run(Reference.java:213)
+
+                          Name : Common-Cleaner
+                      Priority : 8
+                   ThreadGroup : java.lang.ThreadGroup[name=InnocuousThreadGroup,maxpri=10]
+                            ID : 11
+                         State : TIMED_WAITING
+                         Stack : java.lang.Object.wait(Object.java:-2)
+                               : java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155)
+                               : jdk.internal.ref.CleanerImpl.run(CleanerImpl.java:148)
+                               : java.lang.Thread.run(Thread.java:829)
+                               : jdk.internal.misc.InnocuousThread.run(InnocuousThread.java:161)
+
+                          Name : http-nio-8080-exec-4
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 32
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:141)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:33)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1114)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1176)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : http-nio-8080-Acceptor
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 40
+                         State : RUNNABLE
+                         Stack : sun.nio.ch.ServerSocketChannelImpl.accept0(ServerSocketChannelImpl.java:-2)
+                               : sun.nio.ch.ServerSocketChannelImpl.accept(ServerSocketChannelImpl.java:533)
+                               : sun.nio.ch.ServerSocketChannelImpl.accept(ServerSocketChannelImpl.java:285)
+                               : org.apache.tomcat.util.net.NioEndpoint.serverSocketAccept(NioEndpoint.java:548)
+                               : org.apache.tomcat.util.net.NioEndpoint.serverSocketAccept(NioEndpoint.java:79)
+                               : org.apache.tomcat.util.net.Acceptor.run(Acceptor.java:129)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : http-nio-8080-exec-10
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 38
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:141)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:33)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1114)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1176)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : http-nio-8080-exec-7
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 35
+                         State : WAITING
+                         Stack : jdk.internal.misc.Unsafe.park(Unsafe.java:-2)
+                               : java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+                               : java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+                               : java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:141)
+                               : org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:33)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1114)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1176)
+                               : org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+                               : org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : H2 File Lock Watchdog /home/youssef/mydb.lock.db
+                      Priority : 9
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 17
+                         State : TIMED_WAITING
+                         Stack : java.lang.Thread.sleep(Thread.java:-2)
+                               : org.h2.store.FileLock.run(FileLock.java:486)
+                               : java.lang.Thread.run(Thread.java:829)
+
+                          Name : main
+                      Priority : 5
+                   ThreadGroup : java.lang.ThreadGroup[name=main,maxpri=10]
+                            ID : 1
+                         State : RUNNABLE
+                         Stack : java.lang.Thread.dumpThreads(Thread.java:-2)
+                               : java.lang.Thread.getAllStackTraces(Thread.java:1653)
+                               : com.ibm.msg.client.commonservices.j2se.trace.DefaultTracer.generateThreadInfo(DefaultTracer.java:1435)
+                               : com.ibm.msg.client.commonservices.j2se.trace.DefaultTracer.access$1200(DefaultTracer.java:151)
+                               : com.ibm.msg.client.commonservices.j2se.trace.DefaultTracer$10.run(DefaultTracer.java:1382)
+                               : com.ibm.msg.client.commonservices.j2se.trace.DefaultTracer$10.run(DefaultTracer.java:1306)
+                               : java.security.AccessController.doPrivileged(AccessController.java:-2)
+                               : com.ibm.msg.client.commonservices.j2se.trace.DefaultTracer.ffst(DefaultTracer.java:1306)
+                               : com.ibm.msg.client.commonservices.j2se.wmqsupport.TracerImpl.ffst(TracerImpl.java:176)
+                               : com.ibm.msg.client.commonservices.trace.Trace.ffstInternal(Trace.java:1962)
+                               : com.ibm.msg.client.commonservices.trace.Trace.ffst(Trace.java:1762)
+                               : com.ibm.mq.jmqi.local.LocalMQ.checkSize(LocalMQ.java:655)
+                               : com.ibm.mq.jmqi.local.LocalMQ.initialise_inner(LocalMQ.java:514)
+                               : com.ibm.mq.jmqi.local.LocalMQ.initialise(LocalMQ.java:224)
+                               : com.ibm.mq.jmqi.local.LocalMQ.<init>(LocalMQ.java:1250)
+                               : com.ibm.mq.jmqi.local.LocalServer.<init>(LocalServer.java:230)
+                               : jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(NativeConstructorAccessorImpl.java:-2)
+                               : jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+                               : jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+                               : java.lang.reflect.Constructor.newInstance(Constructor.java:490)
+                               : com.ibm.mq.jmqi.JmqiEnvironment.getInstance(JmqiEnvironment.java:765)
+                               : com.ibm.mq.jmqi.JmqiEnvironment.getMQI(JmqiEnvironment.java:699)
+                               : com.ibm.mq.MQSESSION.<init>(MQSESSION.java:2062)
+                               : com.ibm.mq.MQSESSION.getSession(MQSESSION.java:2109)
+                               : com.ibm.mq.MQManagedConnectionJ11.<init>(MQManagedConnectionJ11.java:209)
+                               : com.ibm.mq.MQBindingsManagedConnectionFactoryJ11._createManagedConnection(MQBindingsManagedConnectionFactoryJ11.java:190)
+                               : com.ibm.mq.MQBindingsManagedConnectionFactoryJ11.createManagedConnection(MQBindingsManagedConnectionFactoryJ11.java:236)
+                               : com.ibm.mq.StoredManagedConnection.<init>(StoredManagedConnection.java:97)
+                               : com.ibm.mq.MQSimpleConnectionManager.allocateConnection(MQSimpleConnectionManager.java:194)
+                               : com.ibm.mq.MQQueueManagerFactory.obtainBaseMQQueueManager(MQQueueManagerFactory.java:870)
+                               : com.ibm.mq.MQQueueManagerFactory.procure(MQQueueManagerFactory.java:818)
+                               : com.ibm.mq.MQQueueManagerFactory.constructQueueManager(MQQueueManagerFactory.java:760)
+                               : com.ibm.mq.MQQueueManagerFactory.createQueueManager(MQQueueManagerFactory.java:200)
+                               : com.ibm.mq.MQQueueManager.<init>(MQQueueManager.java:893)
+                               : com.bankapp.messagerouter.service.MqService.sendMessage(MqService2.java:35)
+                               : com.bankapp.messagerouter.MessageRouterApplication.lambda$run$0(MessageRouterApplication.java:27)
+                               : com.bankapp.messagerouter.MessageRouterApplication$$Lambda$1117/0x0000000840857840.run(null:-1)
+                               : org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:765)
+                               : org.springframework.boot.SpringApplication.lambda$callRunners$2(SpringApplication.java:749)
+                               : org.springframework.boot.SpringApplication$$Lambda$1285/0x00000008408ffc40.accept(null:-1)
+                               : java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
+                               : java.util.stream.SortedOps$SizedRefSortingSink.end(SortedOps.java:357)
+                               : java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:485)
+                               : java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)
+                               : java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
+                               : java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
+                               : java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+                               : java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:497)
+                               : org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:744)
+                               : org.springframework.boot.SpringApplication.run(SpringApplication.java:315)
+                               : org.springframework.boot.SpringApplication.run(SpringApplication.java:1300)
+                               : org.springframework.boot.SpringApplication.run(SpringApplication.java:1289)
+                               : com.bankapp.messagerouter.MessageRouterApplication.main(MessageRouterApplication.java:20)
+                               : jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(NativeMethodAccessorImpl.java:-2)
+                               : jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+                               : jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+                               : java.lang.reflect.Method.invoke(Method.java:566)
+                               : org.springframework.boot.loader.MainMethodRunner.run(MainMethodRunner.java:49)
+                               : org.springframework.boot.loader.Launcher.launch(Launcher.java:108)
+                               : org.springframework.boot.loader.Launcher.launch(Launcher.java:58)
+                               : org.springframework.boot.loader.JarLauncher.main(JarLauncher.java:65)
+
+First Failure Symptom Report completed at Sat Dec 28 01:13:07 CET 2024
+------------------------------------END FFST------------------------------------

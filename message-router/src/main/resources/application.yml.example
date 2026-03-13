@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: message-router
+
+  datasource:
+    url: jdbc:h2:file:./data/message_db
+    driver-class-name: org.h2.Driver
+    username: your_username
+    password: your_password
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        issuer-uri: http://localhost:8081/realms/your-realm
+
+mq:
+  queue-manager: your-queue-manager
+  queue-name: your-queue
