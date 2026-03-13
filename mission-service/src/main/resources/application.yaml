@@ -2,10 +2,16 @@ server:
   port: 8084
 
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/spring-app
+
   main:
     allow-bean-definition-overriding: true
   application:
-    name: mission-service
+    name: MISSION-SERVICE
 
 
   datasource:

@@ -15,7 +15,7 @@ spring:
         - id: mission-service
           uri: lb://MISSION-SERVICE
           predicates:
-            - Path=/mission/**
+            - Path=/api/missions/**
         - id: message-router
           uri: lb://MESSAGE-ROUTER
           predicates:
