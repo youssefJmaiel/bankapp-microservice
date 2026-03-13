@@ -36,7 +36,7 @@
 		<module>../hr-service</module>
 		<module>../career-service</module>
 		<module>../mission-service</module>
-		<module>../message-router-master</module>
+		<module>../message-router</module>
 		<module>../partner-service</module>
 		<module>../common</module>
 	</modules>
