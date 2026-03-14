@@ -1,5 +1,6 @@
 package com.bankapp.hr.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -24,5 +25,6 @@ public class Department implements Serializable {
 
     // Un département a plusieurs employés
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference  // Jackson va sérialiser la liste d'employés, mais sans boucle infinie
     private List<Employee> employees;
 }

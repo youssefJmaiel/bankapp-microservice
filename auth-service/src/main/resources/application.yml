@@ -7,7 +7,7 @@ spring:
         registration:
           spring-boot-client:
             client-id: spring-boot-client
-            client-secret: ASXwzdPnBexUvwE1B7dUal05QOXiOP9L
+            client-secret: ${KEYCLOAK_CLIENT_SECRET}
             authorization-grant-type: client_credentials
             scope: ""
             provider: keycloak

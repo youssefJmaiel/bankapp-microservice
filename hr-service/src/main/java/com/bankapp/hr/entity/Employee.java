@@ -1,5 +1,6 @@
 package com.bankapp.hr.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -28,5 +29,6 @@ public class Employee implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")  // clé étrangère vers Department
+    @JsonBackReference  // empêche Jackson de suivre cette relation vers Department
     private Department department;
 }
