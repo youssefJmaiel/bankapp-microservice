@@ -20,7 +20,7 @@ The architecture is designed with concepts commonly used in enterprise Java envi
 
 ---
 
-## 🚀 Project Highlights
+# 🚀 Project Highlights
 
 * 🧩 **Microservices architecture** with independent Spring Boot services
 * 🔐 **OAuth2 / JWT security** with Keycloak
@@ -82,7 +82,7 @@ flowchart TB
     GW -.-> EUREKA
 ```
 
-### Request flow
+### Request Flow
 
 ```text
 Client
@@ -127,7 +127,7 @@ The Gateway provides a **single entry point** to the backend.
 
 Instead of exposing every microservice directly to the client, requests are routed through the Gateway.
 
-### Current routes
+### Current Routes
 
 ```text
 /api/employees/**  → HR-SERVICE
@@ -152,7 +152,7 @@ This allows services to communicate using their logical service names rather tha
 
 Security is implemented using **Keycloak + OAuth2 + JWT**.
 
-### Authentication flow
+### Authentication Flow
 
 ```text
 User
@@ -169,16 +169,11 @@ API Gateway
 Protected Microservice
 ```
 
-The application uses a Keycloak realm:
+The application uses the following Keycloak configuration:
 
 ```text
-spring-app
-```
-
-and client:
-
-```text
-spring-boot-client
+Realm: spring-app
+Client: spring-boot-client
 ```
 
 ### Roles
@@ -207,7 +202,7 @@ One of the main technical components of the project is the integration with **IB
 
 The Message Router service communicates with IBM MQ to support asynchronous message processing.
 
-### Messaging architecture
+### Messaging Architecture
 
 ```text
 REST Client
@@ -301,7 +296,7 @@ message-router/Dockerfile
 mission-service/Dockerfile
 ```
 
-The infrastructure can be orchestrated using:
+The infrastructure is orchestrated using:
 
 ```text
 docker-compose.yml
@@ -309,7 +304,9 @@ docker-compose.yml
 
 The Docker environment includes the main backend services together with the messaging infrastructure.
 
-Environment variables are used for sensitive configuration such as:
+### Environment Variables
+
+Sensitive configuration is provided through environment variables:
 
 ```text
 KEYCLOAK_CLIENT_SECRET
@@ -318,162 +315,77 @@ MQ_PASSWORD_IBM
 MQ_APP_PASSWORD
 ```
 
-Sensitive environment values are intentionally kept outside the Git repository.
+Sensitive values are intentionally kept outside the Git repository.
 
----
-
-# 📚 API Documentation
-
-The services expose Swagger / OpenAPI documentation.
-
-Example:
-
-```text
-http://localhost:8083/swagger-ui/index.html
-```
-
-API documentation allows developers to inspect and test REST endpoints without manually building HTTP requests.
-
----
-
-# 🧪 Testing
-
-The project includes unit tests for backend business logic.
-
-Example:
-
-```text
-message-router/src/test/
-```
-
-The Message Router service includes tests around its message service layer.
-
-Testing is integrated into the Maven project structure.
-
-Run tests with:
-
-```bash
-mvn test
-```
-
----
-
-# 🛠️ Technology Stack
-
-### Backend
-
-* Java 17
-* Spring Boot 2.7.17
-* Spring Security
-* Spring OAuth2 Resource Server
-* Spring Cloud Gateway
-* Spring Cloud Netflix Eureka
-* Spring Data JPA
-* Maven
-
-### Security
-
-* Keycloak
-* OAuth2
-* JWT
-* Role-Based Access Control
-
-### Messaging
-
-* IBM MQ
-* MQ queues
-* Message listeners
-* Asynchronous processing
-
-### Database
-
-* H2
-* PostgreSQL
-
-### DevOps / Infrastructure
-
-* Docker
-* Docker Compose
-* Linux
-* Environment-based configuration
-
-### API
-
-* REST
-* Swagger
-* OpenAPI
-* JSON
-
----
-
-# 📁 Project Structure
-
-```text
-bankapp-microservice/
-│
-├── auth-service/
-│
-├── bankapp-platform/
-│
-├── career-service/
-│
-├── common/
-│
-├── config-server/
-│
-├── discovery-server/
-│
-├── gateway-service/
-│
-├── hr-service/
-│
-├── message-router/
-│
-├── mission-service/
-│
-├── partner-service/
-│
-├── docker-compose.yml
-├── .gitignore
-└── README.md
-```
+The `.env` file is excluded from Git using `.gitignore`.
 
 ---
 
 # ⚙️ Running the Project
 
-## 1. Clone
+## Prerequisites
+
+Install the following tools before running the project:
+
+* Java 17
+* Maven 3.8+
+* Git
+* Docker
+* Docker Compose
+
+---
+
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/youssefJmaiel/bankapp-microservice.git
 cd bankapp-microservice
 ```
 
-## 2. Configure environment variables
+---
 
-Create a local `.env` file containing the required infrastructure credentials.
+## 2. Configure Environment Variables
 
-Example:
+The repository provides an example environment file:
+
+```text
+.env.example
+```
+
+Create your local `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+Then configure the required values:
 
 ```env
-KEYCLOAK_CLIENT_SECRET=your_secret
+KEYCLOAK_CLIENT_SECRET=your_keycloak_client_secret
 MQ_USER_IBM=your_mq_user
 MQ_PASSWORD_IBM=your_mq_password
 MQ_APP_PASSWORD=your_mq_app_password
 ```
 
-> The `.env` file is excluded from Git using `.gitignore`.
+> **Important:** Never commit your real `.env` file or passwords to GitHub.
+
+---
 
 ## 3. Configure Keycloak
 
-Create/configure:
+Start Keycloak and create/configure:
 
 ```text
-Realm: spring-app
-Client: spring-boot-client
+Realm:
+spring-app
 ```
 
-Configure the required users and roles:
+```text
+Client:
+spring-boot-client
+```
+
+Configure the required roles:
 
 ```text
 ADMIN
@@ -481,15 +393,31 @@ AUDITOR
 USER
 ```
 
-## 4. Start the infrastructure
+The application uses Keycloak to issue OAuth2/JWT access tokens used to access protected APIs.
+
+---
+
+## 4. Start the Docker Environment
+
+Build and start the containerized infrastructure:
+
+```bash
+docker compose up --build
+```
+
+If your Docker installation uses the legacy command:
 
 ```bash
 docker-compose up --build
 ```
 
-## 5. Check Eureka
+Docker Compose starts the main backend infrastructure and messaging components defined in `docker-compose.yml`.
 
-Open:
+---
+
+## 5. Verify Eureka
+
+Open the Eureka dashboard:
 
 ```text
 http://localhost:8761
@@ -497,9 +425,18 @@ http://localhost:8761
 
 The registered services should appear in the Eureka dashboard.
 
+Expected services include:
+
+```text
+GATEWAY-SERVICE
+HR-SERVICE
+MISSION-SERVICE
+MESSAGE-ROUTER
+```
+
 ---
 
-# 🔌 Main Endpoints
+## 6. Access the Backend
 
 ### API Gateway
 
@@ -539,9 +476,124 @@ http://localhost:8761
 
 ---
 
-# 💡 Technical Concepts Demonstrated
+# 📚 API Documentation
 
-This project was built to demonstrate practical experience with:
+The services expose Swagger / OpenAPI documentation.
+
+Example:
+
+```text
+http://localhost:8083/swagger-ui/index.html
+```
+
+Swagger allows developers to inspect and test REST endpoints without manually building HTTP requests.
+
+---
+
+# 🧪 Testing
+
+The project includes unit tests for backend business logic.
+
+Example:
+
+```text
+message-router/src/test/
+```
+
+The Message Router service includes tests around its message service layer.
+
+Run the Maven tests with:
+
+```bash
+mvn test
+```
+
+---
+
+# 🛠️ Technology Stack
+
+## Backend
+
+* Java 17
+* Spring Boot 2.7.17
+* Spring Security
+* Spring OAuth2 Resource Server
+* Spring Cloud Gateway
+* Spring Cloud Netflix Eureka
+* Spring Data JPA
+* Maven
+
+## Security
+
+* Keycloak
+* OAuth2
+* JWT
+* Role-Based Access Control
+
+## Messaging
+
+* IBM MQ
+* MQ queues
+* Message listeners
+* Asynchronous processing
+
+## Database
+
+* H2
+* PostgreSQL
+
+## DevOps / Infrastructure
+
+* Docker
+* Docker Compose
+* Linux
+* Environment-based configuration
+
+## API
+
+* REST
+* Swagger
+* OpenAPI
+* JSON
+
+---
+
+# 📁 Project Structure
+
+```text
+bankapp-microservice/
+│
+├── auth-service/
+│
+├── bankapp-platform/
+│
+├── career-service/
+│
+├── common/
+│
+├── config-server/
+│
+├── discovery-server/
+│
+├── gateway-service/
+│
+├── hr-service/
+│
+├── message-router/
+│
+├── mission-service/
+│
+├── partner-service/
+│
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+---
+
+# 💡 Technical Concepts Demonstrated
 
 ```text
 Microservices Architecture
@@ -560,7 +612,7 @@ Microservices Architecture
         └── Unit Testing
 ```
 
-The architecture combines multiple enterprise backend patterns rather than implementing a single monolithic Spring Boot application.
+The project combines multiple enterprise backend patterns rather than implementing a single monolithic Spring Boot application.
 
 ---
 
@@ -588,7 +640,7 @@ The project focuses on:
 
 Computer Science Engineer focused on **Java Backend, Spring Boot and Microservices**.
 
-### Technologies of interest
+### Technologies of Interest
 
 ```text
 Java
