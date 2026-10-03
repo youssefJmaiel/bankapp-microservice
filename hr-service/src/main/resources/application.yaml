@@ -2,19 +2,22 @@ server:
   port: 8083
 
 spring:
+  application:
+    name: hr-service
+
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8081/realms/spring-app
-  application:
-    name: hr-service
+          issuer-uri: https://procurement-lighting-eagle-colleges.trycloudflare.com/realms/spring-app
+          jwk-set-uri: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
 
   datasource:
     url: jdbc:h2:mem:hrdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
     username: sa
     password:
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -29,8 +32,7 @@ management:
       exposure:
         include: "*"
 
-
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://discovery-server:8761/eureka/

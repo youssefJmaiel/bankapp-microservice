@@ -6,6 +6,7 @@ import com.bankapp.mission.service.MissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -18,45 +19,57 @@ public class MissionController {
 
     private final MissionService missionService;
 
-    // Liste toutes les missions
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<List<Mission>> getAllMissions() {
         return ResponseEntity.ok(missionService.getAllMissions());
     }
 
-    // Récupérer une mission par son ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Mission> getMissionById(@PathVariable Long id) {
         return ResponseEntity.ok(missionService.getMissionById(id));
     }
 
-    // Créer une nouvelle mission
     @PostMapping
-    public ResponseEntity<Mission> createMission(@Valid @RequestBody Mission mission) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Mission> createMission(
+            @Valid @RequestBody Mission mission) {
+
         Mission savedMission = missionService.createMission(mission);
         return new ResponseEntity<>(savedMission, HttpStatus.CREATED);
     }
 
-    // Mettre à jour une mission existante
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Mission> updateMission(
             @PathVariable Long id,
             @Valid @RequestBody Mission updatedMission) {
-        return ResponseEntity.ok(missionService.updateMission(id, updatedMission));
+
+        return ResponseEntity.ok(
+                missionService.updateMission(id, updatedMission)
+        );
     }
 
-    // Supprimer une mission
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteMission(@PathVariable Long id) {
         missionService.deleteMission(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Récupérer l'employé assigné à une mission via HR microservice
     @GetMapping("/{id}/employee")
-    public ResponseEntity<EmployeeDTO> getAssignedEmployee(@PathVariable Long id) {
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<EmployeeDTO> getAssignedEmployee(
+            @PathVariable Long id) {
+
         Mission mission = missionService.getMissionById(id);
-        EmployeeDTO employee = (EmployeeDTO) missionService.getAssignedEmployee(mission.getAssignedEmployeeId());
+
+        EmployeeDTO employee =
+                (EmployeeDTO) missionService.getAssignedEmployee(
+                        mission.getAssignedEmployeeId()
+                );
+
         return ResponseEntity.ok(employee);
     }
 }

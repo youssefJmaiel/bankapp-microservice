@@ -7,12 +7,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="partner-service" />
+        <module name="career-service (2) (com.bankapp)" />
         <module name="auth-service" />
         <module name="career-service (1) (com.bankapp)" />
         <module name="discovery-server" />
         <module name="common" />
         <module name="gateway-service" />
         <module name="mission-service" />
+        <module name="career-service (1) (com.bankapp.career)" />
         <module name="career-service" />
         <module name="hr-service" />
         <module name="message-router" />
@@ -25,6 +27,8 @@
       <module name="bankapp-platform" options="-parameters" />
       <module name="career-service" options="-parameters" />
       <module name="career-service (1) (com.bankapp)" options="-parameters" />
+      <module name="career-service (1) (com.bankapp.career)" options="-parameters" />
+      <module name="career-service (2) (com.bankapp)" options="-parameters" />
       <module name="common" options="-parameters" />
       <module name="discovery-server" options="-parameters" />
       <module name="gateway-service" options="-parameters" />

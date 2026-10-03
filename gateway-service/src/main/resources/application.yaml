@@ -4,26 +4,50 @@ server:
 spring:
   application:
     name: gateway-service
+
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
+
       routes:
         - id: hr-service
           uri: lb://HR-SERVICE
           predicates:
             - Path=/api/employees/**
+
+        - id: hr-departments
+          uri: lb://HR-SERVICE
+          predicates:
+            - Path=/api/departments/**
+
         - id: mission-service
           uri: lb://MISSION-SERVICE
           predicates:
             - Path=/api/missions/**
+
         - id: message-router
           uri: lb://MESSAGE-ROUTER
           predicates:
-            - Path=/api/messages/**
+            - Path=/api/messages/**,/api/message/**
+
+        - id: message-router-partners
+          uri: lb://MESSAGE-ROUTER
+          predicates:
+            - Path=/api/partners/**
+
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://discovery-server:8761/eureka/
+
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2.server.resource: TRACE
+    org.springframework.security.oauth2.jwt: TRACE
+    
+

@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 
 import javax.jms.JMSException;
@@ -41,23 +42,35 @@ public class MqConfig {
     @Bean
     public MQQueueConnectionFactory mqQueueConnectionFactory() throws JMSException {
         MQQueueConnectionFactory factory = new MQQueueConnectionFactory();
+
         factory.setHostName(host);
         factory.setPort(port);
         factory.setQueueManager(queueManager);
         factory.setChannel(channel);
-        factory.setTransportType(WMQConstants.WMQ_CM_CLIENT); // client mode
+        factory.setTransportType(WMQConstants.WMQ_CM_CLIENT);
+
+        factory.setStringProperty(WMQConstants.USERID, user);
+        factory.setStringProperty(WMQConstants.PASSWORD, password);
+
         return factory;
     }
 
     @Bean
-    public CachingConnectionFactory cachingConnectionFactory(MQQueueConnectionFactory mqQueueConnectionFactory) {
-        CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(mqQueueConnectionFactory);
+    public CachingConnectionFactory cachingConnectionFactory(
+            MQQueueConnectionFactory mqQueueConnectionFactory) {
+
+        CachingConnectionFactory cachingConnectionFactory =
+                new CachingConnectionFactory(mqQueueConnectionFactory);
+
         cachingConnectionFactory.setSessionCacheSize(10);
+
         return cachingConnectionFactory;
     }
 
     @Bean
-    public JmsTemplate jmsTemplate(CachingConnectionFactory cachingConnectionFactory) {
+    public JmsTemplate jmsTemplate(
+            CachingConnectionFactory cachingConnectionFactory) {
+
         return new JmsTemplate(cachingConnectionFactory);
     }
 
@@ -67,10 +80,33 @@ public class MqConfig {
     }
 
     @Bean
-    public MessageListenerAdapter messageListenerAdapter(MqMessageListener listener) {
+    public MessageListenerAdapter messageListenerAdapter(
+            MqMessageListener listener) {
+
         MessageListenerAdapter adapter = new MessageListenerAdapter();
+
         adapter.setDelegate(listener);
         adapter.setDefaultListenerMethod("handleMessage");
+
         return adapter;
+    }
+
+    @Bean
+    public DefaultMessageListenerContainer messageListenerContainer(
+            CachingConnectionFactory cachingConnectionFactory,
+            Queue queue,
+            MessageListenerAdapter messageListenerAdapter) {
+
+        DefaultMessageListenerContainer container =
+                new DefaultMessageListenerContainer();
+
+        container.setConnectionFactory(cachingConnectionFactory);
+        container.setDestination(queue);
+        container.setMessageListener(messageListenerAdapter);
+
+        container.setConcurrentConsumers(1);
+        container.setMaxConcurrentConsumers(5);
+
+        return container;
     }
 }

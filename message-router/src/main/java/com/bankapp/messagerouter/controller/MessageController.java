@@ -15,7 +15,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
 @Slf4j
 public class MessageController {
 
@@ -39,34 +38,52 @@ public class MessageController {
             @RequestParam(defaultValue = "timestamp") String sortBy,
             @RequestParam(defaultValue = "desc") String direction
     ) {
-        return ResponseEntity.ok(messageService.getMessagesPaginated(page, size, sortBy, direction));
+        return ResponseEntity.ok(
+                messageService.getMessagesPaginated(
+                        page,
+                        size,
+                        sortBy,
+                        direction
+                )
+        );
     }
 
     @GetMapping("/message/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Message> getMessageById(@PathVariable Long id) {
-        Message message = messageService.getMessageById(id); // lance MessageNotFoundException si absent
+        Message message = messageService.getMessageById(id);
         return ResponseEntity.ok(message);
     }
 
     @PostMapping("/message")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Message> saveMessage(@RequestBody Message message) {
-        return new ResponseEntity<>(messageService.saveMessage(message), HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                messageService.saveMessage(message),
+                HttpStatus.CREATED
+        );
     }
 
     @DeleteMapping("/message/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteMessage(@PathVariable Long id) {
-        messageService.deleteMessage(id); // lance MessageNotFoundException si absent
+        messageService.deleteMessage(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/message/send")
-    public ResponseEntity<Message> sendMessage(@Valid @RequestBody MessageRequest messageRequest) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Message> sendMessage(
+            @Valid @RequestBody MessageRequest messageRequest
+    ) {
         log.info("Received message request: {}", messageRequest);
+
         Message message = messageService.sendMessage(
                 messageRequest.getContent(),
                 messageRequest.getSender(),
                 messageRequest.getReceiver()
         );
+
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
 }

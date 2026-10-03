@@ -2,17 +2,18 @@ server:
   port: 8084
 
 spring:
+  application:
+    name: MISSION-SERVICE
+
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8081/realms/spring-app
+          issuer-uri: https://procurement-lighting-eagle-colleges.trycloudflare.com/realms/spring-app
+          jwk-set-uri: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
 
   main:
     allow-bean-definition-overriding: true
-  application:
-    name: MISSION-SERVICE
-
 
   datasource:
     url: jdbc:h2:mem:missiondb
@@ -32,8 +33,7 @@ spring:
           connectTimeout: 5000
           readTimeout: 5000
 
-
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://discovery-server:8761/eureka/

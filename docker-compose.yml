@@ -1,0 +1,141 @@
+services:
+
+  # =====================================================
+  # EUREKA
+  # =====================================================
+  discovery-server:
+    build:
+      context: ./discovery-server
+      dockerfile: Dockerfile
+    container_name: bankapp-discovery
+    ports:
+      - "8761:8761"
+    networks:
+      - bankapp
+
+  # =====================================================
+  # AUTH SERVICE
+  # =====================================================
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: bankapp-auth
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+    networks:
+      - bankapp
+
+  # =====================================================
+  # HR SERVICE
+  # =====================================================
+  hr-service:
+    build:
+      context: ./hr-service
+      dockerfile: Dockerfile
+    container_name: bankapp-hr
+    ports:
+      - "8083:8083"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+    networks:
+      - bankapp
+
+  # =====================================================
+  # MISSION SERVICE
+  # =====================================================
+  mission-service:
+    build:
+      context: ./mission-service
+      dockerfile: Dockerfile
+    container_name: bankapp-mission
+    ports:
+      - "8084:8084"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+    networks:
+      - bankapp
+
+  # =====================================================
+  # MESSAGE ROUTER
+  # =====================================================
+  message-router:
+    build:
+      context: ./message-router
+      dockerfile: Dockerfile
+    container_name: bankapp-message-router
+    ports:
+      - "8085:8085"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      MQ_USER_IBM: ${MQ_USER_IBM}
+      MQ_PASSWORD_IBM: ${MQ_PASSWORD_IBM}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+      - ibm-mq
+    networks:
+      - bankapp
+
+  # =====================================================
+  # GATEWAY
+  # =====================================================
+  gateway-service:
+    build:
+      context: ./gateway-service
+      dockerfile: Dockerfile
+    container_name: bankapp-gateway
+    ports:
+      - "8082:8082"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+      - hr-service
+      - mission-service
+      - message-router
+    networks:
+      - bankapp
+
+  # =====================================================
+  # IBM MQ
+  # =====================================================
+  ibm-mq:
+    image: ibmcom/mq:latest
+    container_name: bankapp-ibm-mq
+    ports:
+      - "1414:1414"
+      - "9443:9443"
+    environment:
+      LICENSE: accept
+      MQ_QMGR_NAME: QM1
+      MQ_CONNAUTH_USE_HTP: "true"
+      MQ_APP_PASSWORD: ${MQ_APP_PASSWORD}
+    stdin_open: true
+    tty: true
+    restart: always
+    networks:
+      - bankapp
+
+# =====================================================
+# NETWORK
+# =====================================================
+networks:
+  bankapp:
+    driver: bridge

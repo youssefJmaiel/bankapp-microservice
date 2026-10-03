@@ -18,7 +18,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/partners")
-@CrossOrigin(origins = "*")
 @Slf4j
 public class PartnerController {
 
@@ -29,7 +28,7 @@ public class PartnerController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Get all partners", responses = {
             @ApiResponse(description = "List of partners", responseCode = "200",
                     content = @Content(mediaType = "application/json",
@@ -40,7 +39,7 @@ public class PartnerController {
     }
 
     @GetMapping("/paged")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Get paged partners", responses = {
             @ApiResponse(description = "Paged list of partners", responseCode = "200",
                     content = @Content(mediaType = "application/json",
@@ -52,16 +51,19 @@ public class PartnerController {
             @RequestParam(defaultValue = "alias") String sortBy,
             @RequestParam(defaultValue = "asc") String direction
     ) {
-        return ResponseEntity.ok(partnerService.getPartnersPaginated(page, size, sortBy, direction));
+        return ResponseEntity.ok(
+                partnerService.getPartnersPaginated(page, size, sortBy, direction)
+        );
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Get partner by ID", responses = {
             @ApiResponse(description = "Partner found", responseCode = "200",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Partner.class))),
-            @ApiResponse(description = "Partner not found", responseCode = "404", content = @Content)
+            @ApiResponse(description = "Partner not found", responseCode = "404",
+                    content = @Content)
     })
     public ResponseEntity<Partner> getPartnerById(@PathVariable Long id) {
         Partner partner = partnerService.getPartnerById(id);
@@ -69,18 +71,26 @@ public class PartnerController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a new partner", responses = {
             @ApiResponse(description = "Partner created", responseCode = "201",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Partner.class)))
     })
-    public ResponseEntity<Partner> savePartner(@Valid @RequestBody Partner partner) {
-        return new ResponseEntity<>(partnerService.savePartner(partner), HttpStatus.CREATED);
+    public ResponseEntity<Partner> savePartner(
+            @Valid @RequestBody Partner partner) {
+
+        return new ResponseEntity<>(
+                partnerService.savePartner(partner),
+                HttpStatus.CREATED
+        );
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete a partner by ID", responses = {
-            @ApiResponse(description = "Partner deleted", responseCode = "204", content = @Content)
+            @ApiResponse(description = "Partner deleted", responseCode = "204",
+                    content = @Content)
     })
     public ResponseEntity<Void> deletePartner(@PathVariable Long id) {
         partnerService.deletePartner(id);
