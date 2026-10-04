@@ -21,7 +21,7 @@ public class TokenController {
 
     private static final String TOKEN_URL = "http://localhost:8081/realms/spring-app/protocol/openid-connect/token";
     private static final String CLIENT_ID = "spring-boot-client";
-    private static final String CLIENT_SECRET = "ASXwzdPnBexUvwE1B7dUal05QOXiOP9L";
+    private static final String CLIENT_SECRET = System.getenv("KEYCLOAK_CLIENT_SECRET");
 
     @GetMapping("/token")
     public String getToken(@RequestParam String username, @RequestParam String password) throws JsonProcessingException {
