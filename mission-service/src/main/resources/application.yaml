@@ -9,7 +9,6 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://procurement-lighting-eagle-colleges.trycloudflare.com/realms/spring-app
           jwk-set-uri: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
 
   main:
