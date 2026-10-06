@@ -5,98 +5,152 @@
 ![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-Gateway%20%7C%20Eureka-orange)
 ![Keycloak](https://img.shields.io/badge/Security-Keycloak%20%2F%20OAuth2-red)
 ![IBM MQ](https://img.shields.io/badge/Messaging-IBM%20MQ-blue)
+![React](https://img.shields.io/badge/Frontend-React%20%2F%20TypeScript-61DAFB)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)
 ![Maven](https://img.shields.io/badge/Maven-3.8%2B-C71A36)
 ![Database](https://img.shields.io/badge/Database-H2%20%7C%20PostgreSQL--ready-lightgrey)
+![Cloudflare](https://img.shields.io/badge/Deployment-Cloudflare%20Pages-F38020)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-> **Enterprise-oriented banking management platform built with Java, Spring Boot, Spring Cloud, OAuth2/JWT, Keycloak, IBM MQ and Docker, with a React frontend deployed on Cloudflare Pages.**
+> **Enterprise-oriented banking management platform built with Java, Spring Boot, Spring Cloud, OAuth2/JWT, Keycloak, IBM MQ, Docker, React and TypeScript.**
 
-[🌐 **Live Demo**](https://cddd48c5.bankapp-frontend-606.pages.dev) · [💻 **GitHub Repository**](https://github.com/youssefJmaiel/bankapp-microservice)
+🌐 **Live Demo:**
+https://cddd48c5.bankapp-frontend-606.pages.dev
 
-> ℹ️ The frontend requires authentication through Keycloak. Demo credentials can be provided separately.
+💻 **Backend Repository:**
+https://github.com/youssefJmaiel/bankapp-microservice
 
-BankApp Microservices is a modular banking management application built around a **distributed microservices architecture**.
+💻 **Frontend Repository:**
+https://github.com/youssefJmaiel/bankapp-frontend
 
-The project demonstrates how independent Spring Boot services can be **secured, discovered, routed and integrated** through REST APIs and asynchronous messaging with IBM MQ.
+---
 
-The architecture combines several enterprise Java concepts:
+# 📌 Overview
 
-* Microservices
-* API Gateway
-* Service discovery
-* OAuth2 / JWT authentication
+**BankApp Microservices** is a full-stack enterprise-oriented banking management platform based on a **distributed microservices architecture**.
+
+The project demonstrates how independent Java/Spring Boot services can be:
+
+* secured with **Keycloak and OAuth2/JWT**
+* discovered dynamically using **Netflix Eureka**
+* accessed through a centralized **Spring Cloud Gateway**
+* persisted using **H2 / PostgreSQL-ready configuration**
+* integrated with **IBM MQ for asynchronous messaging**
+* containerized with **Docker and Docker Compose**
+* documented using **Swagger / OpenAPI**
+* consumed by a modern **React + TypeScript frontend**
+
+The project also implements **role-based access control (RBAC)** to distinguish administrative operations from user consultation and personal messaging.
+
+---
+
+# ✨ Main Features
+
+## 🔐 Authentication & Security
+
+* Keycloak authentication
+* OAuth2 / JWT access tokens
+* JWT validation in backend microservices
+* Spring Security Resource Server
 * Role-based authorization
-* REST APIs
-* Asynchronous messaging
-* Database persistence
-* Docker containerization
-* API documentation
-* Unit testing
+* Protected REST APIs
+* Secure Gateway-to-microservice communication
 
 ---
 
-## 📸 Screenshots
+## 👑 Role-Based Access Control
 
-The following screenshots show the main application features and authentication flow.
+The application implements two main frontend roles:
 
-### 🔐 Authentication — Keycloak
+### 👑 ADMIN
 
-![Keycloak Login](docs/screenshots/01-keycloak-login.png)
+The administrator has full access to the management platform.
 
-The application uses Keycloak to authenticate users and issue OAuth2/JWT access tokens.
+**Employees**
 
----
+* View employees
+* Add employees
+* Edit employees
+* Delete employees
 
-### 🏦 Banking Dashboard
+**Departments**
 
-![BankApp Dashboard](docs/screenshots/02-dashboard.png)
+* View departments
+* Add departments
+* Edit departments
+* Delete departments
 
-The main dashboard provides access to the different business areas of the application.
+**Missions**
 
----
+* View missions
+* Add missions
+* Edit missions
+* Delete missions
+* Assign missions to employees
 
-### 👥 Employee Management
+**Partners**
 
-| Employees                                       | Add Employee                                          |
-| ----------------------------------------------- | ----------------------------------------------------- |
-| ![Employees](docs/screenshots/03-employees.png) | ![Add Employee](docs/screenshots/04-add-employee.png) |
+* View partners
+* Add partners
+* Delete partners
 
-The HR functionality allows users to view and manage employee information.
+**Messages**
 
----
-
-### 🏢 Department Management
-
-| Departments                                         | Add Department                                            |
-| --------------------------------------------------- | --------------------------------------------------------- |
-| ![Departments](docs/screenshots/05-departments.png) | ![Add Department](docs/screenshots/06-add-department.png) |
-
-Departments are managed through the HR service.
-
----
-
-### 📨 Messaging
-
-| Messages                                      | Send Banking Message                                                  |
-| --------------------------------------------- | --------------------------------------------------------------------- |
-| ![Messages](docs/screenshots/07-messages.png) | ![Send Banking Message](docs/screenshots/08-send-banking-message.png) |
-
-Banking messages are handled by the Message Router and integrated with IBM MQ for asynchronous processing.
+* View all banking messages
+* Send banking messages
+* Delete messages
+* Access IBM MQ messaging functionality
 
 ---
 
-### 🤝 Partner Management
+### 👤 USER
 
-| Partners                                      | Add Partner                                         |
-| --------------------------------------------- | --------------------------------------------------- |
-| ![Partners](docs/screenshots/09-partners.png) | ![Add Partner](docs/screenshots/10-add-partner.png) |
+The standard user has **consultation access** to the business modules.
 
-The Message Router also exposes partner management functionality.
+The USER can:
 
-### Empty State
+* View employees
+* View departments
+* View missions
+* View partners
+* View assigned employee information
+* Access the personal messaging inbox
+* Read messages addressed to their username
 
-![Partners Empty State](docs/screenshots/11-partners-empty-state.png)
+The USER cannot:
+
+* Add employees
+* Edit employees
+* Delete employees
+* Add/edit/delete departments
+* Create or modify missions
+* Delete missions
+* Add/delete partners
+* Send banking messages
+* Delete messages
+* Access the administrative IBM MQ message-management interface
+
+### 📬 Personal Message Inbox
+
+A dedicated endpoint allows authenticated users to retrieve only the messages addressed to them:
+
+```text
+GET /api/messages/my
+```
+
+The backend extracts the authenticated user's:
+
+```text
+preferred_username
+```
+
+from the JWT and returns only messages where:
+
+```text
+receiver = authenticated username
+```
+
+This prevents a standard user from accessing the complete administrative message list.
 
 ---
 
@@ -150,7 +204,7 @@ flowchart TB
 
 ---
 
-## 🔄 End-to-End Request Flow
+# 🔄 End-to-End Request Flow
 
 ```text
 React Frontend
@@ -163,215 +217,214 @@ React Frontend
 Spring Cloud Gateway
       │
       ▼
-   Eureka
+    Eureka
       │
- ┌────┼───────────────┐
- ▼    ▼               ▼
- HR  Mission    Message Router
-                         │
-                         ▼
-                      IBM MQ
+      ├───────────────┐
+      ▼               ▼
+ HR Service      Mission Service
+      │
+      │
+      └───────────────┐
+                      ▼
+                Message Router
+                      │
+                      ▼
+                   IBM MQ
 ```
 
-### Authentication flow
+---
+
+# 🔐 Authentication Flow
 
 ```text
 User
-  ↓
+  │
+  ▼
 Keycloak
-  ↓
-JWT Access Token
-  ↓
+  │
+  │ OAuth2 / JWT
+  ▼
 React Frontend
-  ↓
+  │
+  │ Authorization: Bearer <JWT>
+  ▼
 Spring Cloud Gateway
-  ↓
+  │
+  ▼
 Downstream Microservice
 ```
 
-### Banking message flow
+Keycloak provides centralized identity management and JWT tokens.
+
+The backend validates the JWT before allowing access to protected resources.
+
+---
+
+# 📸 Application Screenshots
+
+The following screenshots demonstrate the main application features and authentication flow.
+
+---
+
+## 🔐 1. Keycloak Authentication
+
+![Keycloak Login](docs/screenshots/01-keycloak-login.png)
+
+The application uses **Keycloak** as the centralized identity and access management system.
+
+---
+
+## 🏦 2. Banking Dashboard
+
+![BankApp Dashboard](docs/screenshots/02-dashboard.png)
+
+The main dashboard provides access to the different business modules according to the authenticated user's role.
+
+---
+
+# 👥 Employee Management
+
+## 3. Employees
+
+![Employees](docs/screenshots/03-employees.png)
+
+The employee management interface provides access to employee information.
+
+ADMIN users can perform management operations while USER users have consultation access.
+
+## 4. Add Employee
+
+![Add Employee](docs/screenshots/04-add-employee.png)
+
+Employee creation is restricted to ADMIN users.
+
+---
+
+# 🏢 Department Management
+
+## 5. Departments
+
+![Departments](docs/screenshots/05-departments.png)
+
+Departments are managed through the HR microservice.
+
+## 6. Add Department
+
+![Add Department](docs/screenshots/06-add-department.png)
+
+Creating departments is an administrative operation available to ADMIN users.
+
+---
+
+# 🎯 Mission Management
+
+## 12. Mission Consultation
+
+![Missions](docs/screenshots/12-missions.png)
+
+The Mission Management interface allows authenticated users to consult available missions.
+
+Users can also access the employee associated with a mission when permitted by the backend authorization rules.
+
+## 13. Add Mission
+
+![Add Mission](docs/screenshots/13-add-mission.png)
+
+ADMIN users can create and assign missions to employees.
+
+The frontend sends the mission information to the Mission Service through the API Gateway.
+
+---
+
+# 📨 Banking Messages
+
+## 7. Messages
+
+![Messages](docs/screenshots/07-messages.png)
+
+The messaging interface provides access to banking messages.
+
+### ADMIN
+
+ADMIN users can:
+
+* View all messages
+* Send messages
+* Delete messages
+* Access the IBM MQ messaging workflow
+
+### USER
+
+USER users have a personal inbox and can retrieve only messages addressed to their account.
+
+The frontend calls:
 
 ```text
-React
-  ↓
-Gateway
-  ↓
-Message Router
-  ↓
-Database
-  ↓
-IBM MQ
-  ↓
-MQ Listener
-  ↓
-Message Processing
+GET /api/messages/my
 ```
 
----
-
-# 🚀 Project Highlights
-
-* 🧩 Modular **microservices architecture**
-* ☕ **Java 17** backend
-* 🌱 **Spring Boot 2.7.17**
-* 🌐 **Spring Cloud Gateway**
-* 🔎 **Netflix Eureka service discovery**
-* 🔐 **Keycloak + OAuth2 / JWT**
-* 👥 Role-based authorization with `ADMIN`, `AUDITOR` and `USER`
-* 📨 **IBM MQ** asynchronous messaging
-* 🐳 Docker and Docker Compose
-* 🗄️ H2 database for development
-* 🐘 PostgreSQL-ready configuration
-* 📚 Swagger / OpenAPI documentation
-* 🧪 Unit testing
-* ⚙️ Environment-based configuration
-* ⚛️ React + TypeScript frontend
-* ☁️ Frontend deployment using Cloudflare Pages
-
----
-
-# 🧾 Technology Stack
-
-| Layer             | Technology              | Version / Details              |
-| ----------------- | ----------------------- | ------------------------------ |
-| Language          | Java                    | 17                             |
-| Framework         | Spring Boot             | 2.7.17                         |
-| Cloud             | Spring Cloud            | Gateway / Eureka               |
-| Service Discovery | Netflix Eureka          | —                              |
-| Security          | Keycloak                | OAuth2 / JWT                   |
-| Authentication    | OAuth2 Resource Server  | JWT                            |
-| Messaging         | IBM MQ                  | QM1                            |
-| Database          | H2                      | Development                    |
-| Database          | PostgreSQL              | Production-ready configuration |
-| Build             | Maven                   | 3.8+                           |
-| Containers        | Docker / Docker Compose | —                              |
-| Frontend          | React / TypeScript      | —                              |
-| API Documentation | Swagger / OpenAPI       | —                              |
-| Deployment        | Cloudflare Pages        | Frontend                       |
-
----
-
-# 📦 Microservices
-
-| Service             |   Port | Responsibility                                |
-| ------------------- | -----: | --------------------------------------------- |
-| **API Gateway**     | `8082` | Central API entry point, routing and security |
-| **Auth Service**    |      — | Authentication-related backend integration    |
-| **HR Service**      | `8083` | Employees and departments                     |
-| **Mission Service** | `8084` | Mission management                            |
-| **Message Router**  | `8085` | Messages, partners and IBM MQ integration     |
-| **Eureka Server**   | `8761` | Service discovery                             |
-| **IBM MQ**          | `1414` | Asynchronous enterprise messaging             |
-| **Keycloak**        | `8081` | Identity and access management                |
-
----
-
-# 🌐 API Gateway
-
-The Spring Cloud Gateway provides a centralized entry point for frontend requests.
-
-### Gateway routes
+instead of the administrative:
 
 ```text
-/api/employees/**  → HR-SERVICE
-/api/missions/**   → MISSION-SERVICE
-/api/messages/**   → MESSAGE-ROUTER
-/api/partners/**   → MESSAGE-ROUTER
+GET /api/messages
 ```
 
-The Gateway uses Eureka service discovery and Spring Cloud LoadBalancer.
-
-```text
-lb://HR-SERVICE
-lb://MISSION-SERVICE
-lb://MESSAGE-ROUTER
-```
-
-This allows the Gateway to route requests using logical service names rather than hard-coded service IP addresses.
+This provides proper separation between administrative and personal messaging access.
 
 ---
 
-# 🔐 Security
+## 8. Send Banking Message
 
-Authentication and authorization are implemented with **Keycloak, OAuth2 and JWT**.
+![Send Banking Message](docs/screenshots/08-send-banking-message.png)
 
-### Keycloak configuration
+Sending banking messages is restricted to ADMIN users.
 
-```text
-Realm:  spring-app
-Client: spring-boot-client
-Roles:  ADMIN
-        AUDITOR
-        USER
-```
-
-Authenticated requests use:
-
-```http
-Authorization: Bearer <JWT_TOKEN>
-```
-
-### Security architecture
-
-```text
-React Frontend
-      │
-      │ Authentication
-      ▼
-  Keycloak
-      │
-      │ JWT
-      ▼
-Spring Cloud Gateway
-      │
-      ▼
-Downstream Services
-```
-
-The Gateway validates incoming JWT tokens before routing requests to protected backend services.
-
-The downstream services also use Spring Security for resource-server authentication.
+The message is persisted and then routed through the Message Router toward IBM MQ for asynchronous processing.
 
 ---
 
-## 🛡️ Security Validation
+# 🤝 Partner Management
 
-The authentication flow has been tested using Keycloak-issued JWT tokens.
+## 9. Partners
 
-| Scenario                 | Result             |
-| ------------------------ | ------------------ |
-| Valid JWT                | `200 OK`           |
-| Missing JWT              | `401 Unauthorized` |
-| JWT-based authentication | Validated          |
-| `ADMIN` role             | Supported          |
-| `AUDITOR` role           | Supported          |
-| `USER` role              | Supported          |
-| Gateway → HR with JWT    | `200 OK`           |
+![Partners](docs/screenshots/09-partners.png)
 
-No credentials, access tokens or secrets are stored in the repository.
+The Partner Management functionality is provided through the Message Router.
+
+## 10. Add Partner
+
+![Add Partner](docs/screenshots/10-add-partner.png)
+
+Partner creation is restricted to ADMIN users.
+
+## 11. Partners Empty State
+
+![Partners Empty State](docs/screenshots/11-partners-empty-state.png)
+
+The application also provides a clean empty-state interface when no partners are available.
 
 ---
 
 # 📨 IBM MQ — Asynchronous Messaging
 
-The Message Router integrates IBM MQ to support asynchronous message processing.
+The **Message Router** integrates IBM MQ to demonstrate enterprise asynchronous messaging.
 
 ```text
-REST Client
-     │
-     ▼
+React Frontend
+      │
+      ▼
 API Gateway
-     │
-     ▼
+      │
+      ▼
 Message Router
-     │
-     ├── Database
-     │
-     ▼
-  IBM MQ
-     │
-     ├── DEV.QUEUE.1
-     └── DEV.QUEUE.2
+      │
+      ├── Database
+      │
+      ▼
+   IBM MQ
+      │
+      ├── DEV.QUEUE.1
+      └── DEV.QUEUE.2
 ```
 
 The Message Router contains components responsible for:
@@ -385,32 +438,81 @@ The Message Router contains components responsible for:
 * Exception handling
 * Message persistence
 
-This demonstrates the combination of:
+The project demonstrates the combination of:
 
 ```text
 Synchronous REST APIs
           +
-Asynchronous IBM MQ messaging
+Asynchronous IBM MQ Messaging
+```
+
+---
+
+# 📬 Message Processing Flow
+
+```text
+ADMIN
+  │
+  │ Send Banking Message
+  ▼
+React Frontend
+  │
+  ▼
+API Gateway
+  │
+  ▼
+Message Router
+  │
+  ├── Persist Message
+  │
+  ▼
+IBM MQ
+  │
+  ▼
+MQ Listener
+  │
+  ▼
+Message Processing
+```
+
+For a USER:
+
+```text
+USER
+ │
+ ▼
+React Frontend
+ │
+ ▼
+API Gateway
+ │
+ ▼
+Message Router
+ │
+ ▼
+/api/messages/my
+ │
+ ▼
+Messages addressed to USER
 ```
 
 ---
 
 # 🔎 Service Discovery — Eureka
 
-Eureka provides service registration and discovery.
+Netflix Eureka provides dynamic service registration and discovery.
 
 ```text
                     Eureka
-                    :8761
+                     :8761
                        │
           ┌────────────┼────────────┐
           ▼            ▼            ▼
       HR Service    Mission     Message Router
-        :8083       Service         :8085
-                     :8084
+        :8083        :8084          :8085
 ```
 
-The Gateway communicates with services through logical service identifiers:
+The Gateway communicates with services using logical service identifiers:
 
 ```text
 HR-SERVICE
@@ -422,57 +524,216 @@ This avoids hard-coded backend service addresses in the Gateway routing configur
 
 ---
 
+# 🌐 API Gateway
+
+Spring Cloud Gateway provides a centralized entry point for frontend requests.
+
+### Gateway Routes
+
+```text
+/api/employees/**  → HR-SERVICE
+/api/missions/**   → MISSION-SERVICE
+/api/messages/**   → MESSAGE-ROUTER
+/api/partners/**   → MESSAGE-ROUTER
+```
+
+The Gateway uses Eureka and Spring Cloud LoadBalancer:
+
+```text
+lb://HR-SERVICE
+lb://MISSION-SERVICE
+lb://MESSAGE-ROUTER
+```
+
+---
+
+# 🔐 Security Architecture
+
+Authentication and authorization are implemented using:
+
+* Keycloak
+* OAuth2
+* JWT
+* Spring Security
+* OAuth2 Resource Server
+
+### Roles
+
+```text
+ADMIN
+AUDITOR
+USER
+```
+
+The current frontend access-control implementation focuses on:
+
+```text
+ADMIN
+USER
+```
+
+### JWT
+
+Authenticated requests use:
+
+```http
+Authorization: Bearer <JWT_TOKEN>
+```
+
+The backend validates the token and applies role-based authorization using Spring Security.
+
+---
+
+# 🛡️ Role-Based Authorization Matrix
+
+| Feature               | ADMIN | USER |
+| --------------------- | :---: | :--: |
+| Dashboard             |   ✅   |   ✅  |
+| View Employees        |   ✅   |   ✅  |
+| Add Employee          |   ✅   |   ❌  |
+| Edit Employee         |   ✅   |   ❌  |
+| Delete Employee       |   ✅   |   ❌  |
+| View Departments      |   ✅   |   ✅  |
+| Add Department        |   ✅   |   ❌  |
+| Edit Department       |   ✅   |   ❌  |
+| Delete Department     |   ✅   |   ❌  |
+| View Missions         |   ✅   |   ✅  |
+| Add Mission           |   ✅   |   ❌  |
+| Edit Mission          |   ✅   |   ❌  |
+| Delete Mission        |   ✅   |   ❌  |
+| View Partners         |   ✅   |   ✅  |
+| Add Partner           |   ✅   |   ❌  |
+| Delete Partner        |   ✅   |   ❌  |
+| View All Messages     |   ✅   |   ❌  |
+| View Personal Inbox   |   ✅   |   ✅  |
+| Send Message          |   ✅   |   ❌  |
+| Delete Message        |   ✅   |   ❌  |
+| IBM MQ Administration |   ✅   |   ❌  |
+
+> **Backend authorization remains the source of truth.** Frontend role-based visibility improves the user experience, while protected backend endpoints enforce the actual permissions.
+
+---
+
+# 🧾 Technology Stack
+
+| Layer             | Technology              | Details            |
+| ----------------- | ----------------------- | ------------------ |
+| Backend Language  | Java                    | 17                 |
+| Backend Framework | Spring Boot             | 2.7.17             |
+| Cloud             | Spring Cloud            | Gateway / Eureka   |
+| Service Discovery | Netflix Eureka          | Dynamic discovery  |
+| Security          | Keycloak                | OAuth2 / JWT       |
+| Authentication    | OAuth2 Resource Server  | JWT                |
+| Authorization     | Spring Security         | RBAC               |
+| Messaging         | IBM MQ                  | QM1                |
+| Database          | H2                      | Development        |
+| Database          | PostgreSQL              | Production-ready   |
+| Build             | Maven                   | 3.8+               |
+| Containers        | Docker / Docker Compose | Containerization   |
+| Frontend          | React                   | Modern SPA         |
+| Frontend Language | TypeScript              | Type-safe frontend |
+| API Documentation | Swagger / OpenAPI       | REST documentation |
+| Deployment        | Cloudflare Pages        | Frontend           |
+
+---
+
+# 📦 Microservices
+
+| Service             |   Port | Responsibility                                |
+| ------------------- | -----: | --------------------------------------------- |
+| **API Gateway**     | `8082` | Central API entry point, routing and security |
+| **Auth Service**    |      — | Authentication-related backend integration    |
+| **HR Service**      | `8083` | Employees and departments                     |
+| **Mission Service** | `8084` | Mission management                            |
+| **Message Router**  | `8085` | Messages, partners and IBM MQ integration     |
+| **Eureka Server**   | `8761` | Service discovery                             |
+| **Keycloak**        | `8081` | Identity and access management                |
+| **IBM MQ**          | `1414` | Asynchronous messaging                        |
+
+---
+
 # 🗄️ Data Persistence
 
-The project currently uses H2 for development and is prepared for PostgreSQL-based deployment.
+The project uses H2 for development and is prepared for PostgreSQL-based deployment.
 
 | Environment              | Database         |
 | ------------------------ | ---------------- |
 | Development              | H2               |
 | Production configuration | PostgreSQL-ready |
 
-The Message Router persists domain information including:
+The different services maintain their own domain data.
+
+### Message Router
+
+Persists:
 
 * Messages
 * Partners
 
-The HR and Mission services also maintain their respective domain data.
+### HR Service
+
+Persists:
+
+* Employees
+* Departments
+
+### Mission Service
+
+Persists:
+
+* Missions
+* Employee assignments
 
 ---
 
 # 🐳 Docker & Docker Compose
 
-The main backend components are containerized using Docker.
+The backend infrastructure is containerized using Docker.
 
-Example Dockerfiles:
+Main services include:
 
 ```text
-auth-service/Dockerfile
-discovery-server/Dockerfile
-gateway-service/Dockerfile
-hr-service/Dockerfile
-message-router/Dockerfile
-mission-service/Dockerfile
+auth-service
+discovery-server
+gateway-service
+hr-service
+message-router
+mission-service
 ```
 
-The complete environment can be orchestrated with:
+The complete environment can be orchestrated using:
 
 ```text
 docker-compose.yml
 ```
 
-### Environment variables
+Example:
 
-Sensitive configuration is provided through environment variables:
-
-```text
-KEYCLOAK_CLIENT_SECRET
-MQ_USER_IBM
-MQ_PASSWORD_IBM
-MQ_APP_PASSWORD
+```bash
+docker compose up --build
 ```
 
-The real `.env` file is excluded from Git using `.gitignore`.
+---
+
+# ⚙️ Environment Configuration
+
+Sensitive configuration is provided through environment variables.
+
+Example:
+
+```env
+KEYCLOAK_CLIENT_SECRET=your_keycloak_client_secret
+MQ_USER_IBM=your_mq_user
+MQ_PASSWORD_IBM=your_mq_password
+MQ_APP_PASSWORD=your_mq_app_password
+```
+
+The real `.env` file is excluded from Git.
+
+```gitignore
+.env
+target/
+```
 
 An example configuration is provided through:
 
@@ -480,164 +741,70 @@ An example configuration is provided through:
 .env.example
 ```
 
-Example:
-
-```env
-KEYCLOAK_CLIENT_SECRET=your_keycloak_client_secret
-MQ_USER_IBM=your_mq_user
-MQ_PASSWORD_IBM=your_mq_password
-MQ_APP_PASSWORD=your_mq_app_password
-```
-
-> **Important:** Never commit the real `.env` file or any credentials to the repository.
+> ⚠️ **Never commit real credentials, passwords, access tokens or client secrets to the repository.**
 
 ---
 
-# ⚙️ Running the Project
+# 🌐 Frontend
 
-## Prerequisites
+The frontend is implemented using:
 
-Install:
+* React
+* TypeScript
+* Vite
+* Tailwind CSS
+* Keycloak
+* OAuth2 / JWT
+* REST API integration
 
-* Java 17
-* Maven 3.8+
-* Git
-* Docker
-* Docker Compose
-
----
-
-## 1. Clone the repository
-
-```bash
-git clone https://github.com/youssefJmaiel/bankapp-microservice.git
-cd bankapp-microservice
-```
-
----
-
-## 2. Configure environment variables
-
-Create the local environment file:
-
-```bash
-cp .env.example .env
-```
-
-Then configure the required values:
-
-```env
-KEYCLOAK_CLIENT_SECRET=your_keycloak_client_secret
-MQ_USER_IBM=your_mq_user
-MQ_PASSWORD_IBM=your_mq_password
-MQ_APP_PASSWORD=your_mq_app_password
-```
-
----
-
-## 3. Configure Keycloak
-
-Create the following Keycloak configuration:
+The frontend communicates with the backend through the API Gateway.
 
 ```text
-Realm:
-spring-app
-
-Client:
-spring-boot-client
-
-Roles:
-ADMIN
-AUDITOR
-USER
-```
-
-Configure the client according to the authentication flow used by the application.
-
----
-
-## 4. Start the backend environment
-
-```bash
-docker compose up --build
-```
-
-For older Docker installations:
-
-```bash
-docker-compose up --build
+React
+  │
+  ▼
+Keycloak Authentication
+  │
+  ▼
+JWT
+  │
+  ▼
+API Gateway
+  │
+  ▼
+Microservices
 ```
 
 ---
 
-## 5. Verify the containers
+# ☁️ Deployment
 
-```bash
-docker compose ps
-```
-
-Expected backend components include:
+The frontend is deployed using **Cloudflare Pages**.
 
 ```text
-GATEWAY-SERVICE
-HR-SERVICE
-MISSION-SERVICE
-MESSAGE-ROUTER
-DISCOVERY-SERVER
+React + TypeScript
+        │
+        ▼
+   Cloudflare Pages
+        │
+        ▼
+   API Gateway
+        │
+        ▼
+  Spring Microservices
 ```
 
-Keycloak and IBM MQ are also required for the complete environment.
+Live frontend:
 
----
+**https://cddd48c5.bankapp-frontend-606.pages.dev**
 
-## 6. Verify Eureka
-
-Open:
-
-```text
-http://localhost:8761
-```
-
-The Gateway should be able to discover the registered backend services.
-
----
-
-## 7. Verify Gateway security
-
-A protected endpoint without authentication should return:
-
-```text
-401 Unauthorized
-```
-
-Example:
-
-```bash
-curl -i http://localhost:8082/api/employees
-```
-
----
-
-# 🌐 Backend Endpoints
-
-| Component       | URL                                           |
-| --------------- | --------------------------------------------- |
-| API Gateway     | `http://localhost:8082`                       |
-| HR Service      | `http://localhost:8083/api/employees`         |
-| Mission Service | `http://localhost:8084/api/missions`          |
-| Message Router  | `http://localhost:8085/api/messages`          |
-| Partners        | `http://localhost:8085/api/partners`          |
-| Eureka          | `http://localhost:8761`                       |
-| Keycloak        | `http://localhost:8081`                       |
-| Swagger UI      | `http://localhost:8083/swagger-ui/index.html` |
-
-For normal frontend communication, requests are intended to go through the **API Gateway**.
+> The live environment depends on the availability and configuration of the backend infrastructure and Keycloak authentication.
 
 ---
 
 # 📚 API Documentation
 
-Swagger / OpenAPI is used to document backend REST APIs.
+The backend exposes REST APIs documented with **Swagger / OpenAPI**.
 
 Example:
 
@@ -645,15 +812,54 @@ Example:
 http://localhost:8083/swagger-ui/index.html
 ```
 
-Other services expose their own API documentation depending on their configuration.
+The main API Gateway is available at:
+
+```text
+http://localhost:8082
+```
 
 ---
 
-# 🧪 Testing
+# 🌐 Backend Endpoints
 
-The project includes unit tests for business logic.
+| Component         | URL                                           |
+| ----------------- | --------------------------------------------- |
+| API Gateway       | `http://localhost:8082`                       |
+| HR Service        | `http://localhost:8083/api/employees`         |
+| Mission Service   | `http://localhost:8084/api/missions`          |
+| Message Router    | `http://localhost:8085/api/messages`          |
+| Personal Messages | `http://localhost:8085/api/messages/my`       |
+| Partners          | `http://localhost:8085/api/partners`          |
+| Eureka            | `http://localhost:8761`                       |
+| Keycloak          | `http://localhost:8081`                       |
+| Swagger UI        | `http://localhost:8083/swagger-ui/index.html` |
 
-Run the Maven test suite with:
+For normal frontend communication, requests are intended to go through the **API Gateway**.
+
+---
+
+# 🧪 Testing & Validation
+
+The project includes unit tests for business logic and has been validated through authentication, authorization and integration scenarios.
+
+### Security validation
+
+| Scenario                       | Result             |
+| ------------------------------ | ------------------ |
+| Valid JWT                      | `200 OK`           |
+| Missing JWT                    | `401 Unauthorized` |
+| JWT authentication             | ✅ Validated        |
+| ADMIN role                     | ✅ Supported        |
+| USER role                      | ✅ Supported        |
+| Gateway → HR with JWT          | `200 OK`           |
+| USER → Personal Messages       | `200 OK`           |
+| USER → Administrative Messages | ❌ Forbidden        |
+| USER → Send Message            | ❌ Forbidden        |
+| ADMIN → Send Message           | ✅ Allowed          |
+
+### Maven Tests
+
+Run:
 
 ```bash
 ./mvnw test
@@ -664,14 +870,6 @@ or:
 ```bash
 mvn test
 ```
-
-Example test location:
-
-```text
-message-router/src/test/
-```
-
-Testing focuses on service-layer business logic and application behavior.
 
 ---
 
@@ -704,7 +902,9 @@ bankapp-microservice/
 │       ├── 08-send-banking-message.png
 │       ├── 09-partners.png
 │       ├── 10-add-partner.png
-│       └── 11-partners-empty-state.png
+│       ├── 11-partners-empty-state.png
+│       ├── 12-missions.png
+│       └── 13-add-mission.png
 │
 ├── docker-compose.yml
 ├── .env.example
@@ -716,59 +916,56 @@ bankapp-microservice/
 
 # 🔄 Main Technical Concepts Demonstrated
 
-This project was developed to practice and demonstrate the following backend and distributed-system concepts:
-
-### Microservices
+## Microservices
 
 Independent services with separated business responsibilities.
 
-### API Gateway
+## API Gateway
 
 Centralized routing between the frontend and backend services.
 
-### Service Discovery
+## Service Discovery
 
-Dynamic service registration and discovery using Eureka.
+Dynamic registration and discovery using Eureka.
 
-### OAuth2 / JWT
+## OAuth2 / JWT
 
 Token-based authentication and authorization.
 
-### Keycloak
+## Keycloak
 
 Centralized identity and access management.
 
-### Role-Based Authorization
+## Role-Based Authorization
 
-Application roles:
+Different application permissions based on authenticated roles.
 
 ```text
 ADMIN
-AUDITOR
 USER
 ```
 
-### REST APIs
+## REST APIs
 
 Communication between the frontend, Gateway and backend services.
 
-### Asynchronous Messaging
+## Asynchronous Messaging
 
-IBM MQ for asynchronous enterprise message processing.
+IBM MQ for enterprise asynchronous message processing.
 
-### Persistence
+## Persistence
 
 H2 for development with PostgreSQL-ready configuration.
 
-### Containerization
+## Containerization
 
-Docker and Docker Compose for service deployment and infrastructure management.
+Docker and Docker Compose for infrastructure management.
 
-### API Documentation
+## API Documentation
 
 Swagger / OpenAPI for REST API documentation.
 
-### Automated Testing
+## Automated Testing
 
 Unit tests for service-layer business logic.
 
@@ -776,59 +973,118 @@ Unit tests for service-layer business logic.
 
 # 🎯 Project Objectives
 
-The main objective of BankApp Microservices is to implement and demonstrate a distributed backend using technologies commonly used in **enterprise Java development**.
+The main objective of **BankApp Microservices** is to demonstrate the design and implementation of an enterprise-oriented distributed application using technologies commonly found in professional Java backend environments.
 
 The project focuses on:
 
+* Microservices architecture
 * Separation of business responsibilities
 * Secure API communication
 * Centralized authentication
+* OAuth2 / JWT
 * Role-based authorization
 * API Gateway routing
 * Dynamic service discovery
-* REST-based service communication
+* REST APIs
 * Asynchronous messaging
+* IBM MQ integration
 * Database persistence
-* Containerized infrastructure
-* Maintainable service structure
+* Docker containerization
 * API documentation
 * Unit testing
-* Development-to-production database flexibility
+* Frontend/backend integration
+* Cloud deployment
 
 ---
 
 # 💼 What This Project Demonstrates
 
-From a software engineering perspective, the project demonstrates practical experience with:
+From a software engineering perspective, the project demonstrates practical implementation of:
 
 ```text
-Java
-  │
-  ├── Spring Boot
-  ├── Spring Security
-  ├── Spring Cloud
-  │      ├── Gateway
-  │      └── Eureka
-  │
-  ├── OAuth2 / JWT
-  ├── Keycloak
-  ├── REST APIs
-  ├── IBM MQ
-  ├── H2 / PostgreSQL
-  ├── Docker
-  ├── Maven
-  └── Swagger / OpenAPI
+Java 17
+   │
+   ├── Spring Boot
+   ├── Spring Security
+   ├── Spring Cloud
+   │      ├── Gateway
+   │      └── Eureka
+   │
+   ├── OAuth2 / JWT
+   ├── Keycloak
+   ├── REST APIs
+   ├── IBM MQ
+   ├── H2 / PostgreSQL
+   ├── Docker
+   ├── Maven
+   └── Swagger / OpenAPI
 ```
 
 The frontend complements the backend architecture with:
 
 ```text
 React
-TypeScript
-REST API integration
-Keycloak authentication
-Cloudflare Pages deployment
+   │
+   ├── TypeScript
+   ├── Vite
+   ├── Tailwind CSS
+   ├── Keycloak Authentication
+   ├── OAuth2 / JWT
+   ├── REST API Integration
+   └── Cloudflare Pages
 ```
+
+---
+
+# 🚀 Key Achievements
+
+### Backend
+
+* Designed a distributed Spring Boot microservices architecture
+* Implemented Spring Cloud Gateway
+* Implemented Eureka service discovery
+* Integrated Keycloak
+* Implemented OAuth2 / JWT security
+* Implemented role-based authorization
+* Integrated IBM MQ
+* Implemented synchronous REST and asynchronous messaging
+* Added H2 persistence
+* Prepared PostgreSQL configuration
+* Containerized backend services with Docker
+* Added Swagger / OpenAPI documentation
+* Implemented unit testing
+
+### Frontend
+
+* Built a React + TypeScript banking management interface
+* Integrated Keycloak authentication
+* Implemented JWT-based authentication
+* Implemented ADMIN / USER role-based UI
+* Added employee management
+* Added department management
+* Added mission management
+* Added partner management
+* Added banking messaging
+* Implemented personal USER message inbox
+* Hid administrative operations from standard users
+* Integrated frontend with the API Gateway
+* Deployed frontend using Cloudflare Pages
+
+### Security & Authorization
+
+The application follows a **defense-in-depth authorization approach**:
+
+```text
+Frontend Role-Based UI
+        +
+Backend Spring Security
+        +
+Keycloak JWT
+        =
+Protected Enterprise Application
+```
+
+Frontend restrictions improve usability, while backend authorization prevents unauthorized API access.
 
 ---
 
@@ -838,8 +1094,6 @@ The React frontend is available online:
 
 **https://cddd48c5.bankapp-frontend-606.pages.dev**
 
-The frontend communicates with the backend through the configured API Gateway.
-
 Authentication is handled through Keycloak.
 
 > The live environment may depend on the availability of the backend infrastructure and authentication configuration.
@@ -848,19 +1102,29 @@ Authentication is handled through Keycloak.
 
 # 👨‍💻 Author
 
-**Youssef Jmaiel**
+## Youssef Jmaiel
 
-Computer Science Engineer focused on:
+**Computer Science Engineer**
 
-**Java Backend · Spring Boot · Microservices**
+Focused on:
+
+**Java Backend · Spring Boot · Microservices · Full-Stack Development**
 
 ### GitHub
 
 https://github.com/youssefJmaiel
 
-### Project
+### LinkedIn
+
+https://linkedin.com/in/youssef-jmaiel
+
+### Backend Project
 
 https://github.com/youssefJmaiel/bankapp-microservice
+
+### Frontend Project
+
+https://github.com/youssefJmaiel/bankapp-frontend
 
 ---
 
