@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,6 +25,14 @@ public class MessageController {
     public MessageController(MessageService messageService) {
         this.messageService = messageService;
     }
+
+    @GetMapping("/messages/my")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public List<Message> getMyMessages(@AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return messageService.getMessagesForReceiver(username);
+    }
+
 
     @GetMapping("/messages")
     @PreAuthorize("hasRole('ADMIN')")

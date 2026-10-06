@@ -19,7 +19,6 @@ public class MessageRouterApplication {
 		return args -> {
 			try {
 				mqService.connect();
-				mqService.sendMessage("Hello, this is a test message.");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

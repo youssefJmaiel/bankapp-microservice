@@ -30,6 +30,11 @@ public class MessageService {
         this.objectMapper = objectMapper;
     }
 
+    public List<Message> getMessagesForReceiver(String receiver) {
+        return messageRepository.findByReceiver(receiver);
+    }
+
+
     public List<Message> getAllMessages() {
         return messageRepository.findAll();
     }
