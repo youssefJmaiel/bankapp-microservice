@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "messages")
 @Data
 public class Message implements Serializable {
     @Id

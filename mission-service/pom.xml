@@ -17,7 +17,6 @@
 	<description>Service de gestion des missions</description>
 
 	<properties>
-		<java.version>11</java.version>
 		<springdoc.version>1.7.0</springdoc.version>
 	</properties>
 
@@ -69,6 +68,12 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Liquibase Database Migrations -->
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
 		</dependency>
 
 		<!-- H2 Database for Dev/Test -->

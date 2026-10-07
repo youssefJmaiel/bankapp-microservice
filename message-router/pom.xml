@@ -91,6 +91,12 @@
 			<version>3.0.0</version>
 		</dependency>
 
+		<!-- Liquibase Database Migrations -->
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+		</dependency>
+
 		<!-- Databases -->
 		<dependency>
 			<groupId>com.h2database</groupId>

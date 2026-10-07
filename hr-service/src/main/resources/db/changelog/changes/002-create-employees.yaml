@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-employees
+      author: youssef
+      changes:
+        - createTable:
+            tableName: employees
+            schemaName: hr_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: first_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: last_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+
+              - column:
+                  name: department_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+
+        - addForeignKeyConstraint:
+            baseTableSchemaName: hr_schema
+            baseTableName: employees
+            baseColumnNames: department_id
+            referencedTableSchemaName: hr_schema
+            referencedTableName: departments
+            referencedColumnNames: id
+            constraintName: fk_employees_department

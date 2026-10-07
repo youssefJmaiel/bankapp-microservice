@@ -23,7 +23,7 @@
 
 	<!-- Versions -->
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 		<spring-cloud.version>2021.0.8</spring-cloud.version>
 		<springdoc.version>1.6.15</springdoc.version>
 	</properties>

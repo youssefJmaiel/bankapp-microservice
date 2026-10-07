@@ -17,7 +17,6 @@
 	<description>Service de gestion des ressources humaines</description>
 
 	<properties>
-		<java.version>11</java.version>
 		<springdoc.version>1.7.0</springdoc.version>
 	</properties>
 
@@ -47,6 +46,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+		<!-- Liquibase Database Migrations -->
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
 		</dependency>
 
 		<!-- PostgreSQL Driver -->
