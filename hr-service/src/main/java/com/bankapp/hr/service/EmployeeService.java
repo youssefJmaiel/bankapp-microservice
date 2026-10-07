@@ -1,14 +1,17 @@
 package com.bankapp.hr.service;
 
+import com.bankapp.hr.converter.EmployeeDtoConverter;
+import com.bankapp.hr.converter.EmployeeRequestConverter;
+import com.bankapp.hr.dto.EmployeeDto;
+import com.bankapp.hr.dto.EmployeeRequest;
 import com.bankapp.hr.entity.Employee;
-import com.bankapp.hr.entity.Department;
 import com.bankapp.hr.repository.EmployeeRepository;
-import com.bankapp.hr.repository.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -16,44 +19,64 @@ import java.util.List;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
-    private final DepartmentRepository departmentRepository;
+    private final EmployeeRequestConverter employeeRequestConverter;
+    private final EmployeeDtoConverter employeeDtoConverter;
 
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    @Transactional
+    public List<EmployeeDto> getAllEmployees() {
+        return employeeRepository.findAll()
+                .stream()
+                .map(employeeDtoConverter::convert)
+                .collect(Collectors.toList());
     }
 
-    public Employee getEmployeeById(Long id) {
-        return employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found with id: " + id));
+    @Transactional
+    public EmployeeDto getEmployeeById(Long id) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Employee not found with id: " + id)
+                );
+
+        return employeeDtoConverter.convert(employee);
     }
 
-    public Employee createEmployee(Employee employee, Long departmentId) {
-        if (departmentId != null) {
-            Department dept = departmentRepository.findById(departmentId)
-                    .orElseThrow(() -> new RuntimeException("Department not found with id: " + departmentId));
-            employee.setDepartment(dept);
+    @Transactional
+    public EmployeeDto createEmployee(EmployeeRequest request) {
+        Employee employee = employeeRequestConverter.convert(request);
+
+        Employee savedEmployee = employeeRepository.save(employee);
+
+        return employeeDtoConverter.convert(savedEmployee);
+    }
+
+    @Transactional
+    public EmployeeDto updateEmployee(Long id, EmployeeRequest request) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Employee not found with id: " + id)
+                );
+
+        employee.setFirstName(request.getFirstName());
+        employee.setLastName(request.getLastName());
+        employee.setEmail(request.getEmail());
+
+        if (request.getDepartmentId() != null) {
+            Employee convertedEmployee = employeeRequestConverter.convert(request);
+            employee.setDepartment(convertedEmployee.getDepartment());
         }
-        return employeeRepository.save(employee);
+
+        Employee updatedEmployee = employeeRepository.save(employee);
+
+        return employeeDtoConverter.convert(updatedEmployee);
     }
 
-    public Employee updateEmployee(Long id, Employee updatedEmployee, Long departmentId) {
-        Employee employee = getEmployeeById(id);
-
-        employee.setFirstName(updatedEmployee.getFirstName());
-        employee.setLastName(updatedEmployee.getLastName());
-        employee.setEmail(updatedEmployee.getEmail());
-
-        if (departmentId != null) {
-            Department dept = departmentRepository.findById(departmentId)
-                    .orElseThrow(() -> new RuntimeException("Department not found with id: " + departmentId));
-            employee.setDepartment(dept);
-        }
-
-        return employeeRepository.save(employee);
-    }
-
+    @Transactional
     public void deleteEmployee(Long id) {
-        Employee employee = getEmployeeById(id);
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Employee not found with id: " + id)
+                );
+
         employeeRepository.delete(employee);
     }
 }

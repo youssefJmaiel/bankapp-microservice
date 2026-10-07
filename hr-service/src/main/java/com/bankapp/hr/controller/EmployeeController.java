@@ -1,12 +1,14 @@
 package com.bankapp.hr.controller;
 
-import com.bankapp.hr.entity.Employee;
+import com.bankapp.hr.dto.EmployeeDto;
+import com.bankapp.hr.dto.EmployeeRequest;
 import com.bankapp.hr.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -18,34 +20,32 @@ public class EmployeeController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public List<Employee> getAllEmployees() {
+    public List<EmployeeDto> getAllEmployees() {
         return employeeService.getAllEmployees();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<Employee> getEmployee(@PathVariable Long id) {
+    public ResponseEntity<EmployeeDto> getEmployee(@PathVariable Long id) {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Employee> createEmployee(
-            @RequestBody Employee employee,
-            @RequestParam(required = false) Long departmentId) {
+    public ResponseEntity<EmployeeDto> createEmployee(
+            @Valid @RequestBody EmployeeRequest request) {
         return ResponseEntity.ok(
-                employeeService.createEmployee(employee, departmentId)
+                employeeService.createEmployee(request)
         );
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Employee> updateEmployee(
+    public ResponseEntity<EmployeeDto> updateEmployee(
             @PathVariable Long id,
-            @RequestBody Employee employee,
-            @RequestParam(required = false) Long departmentId) {
+            @Valid @RequestBody EmployeeRequest request) {
         return ResponseEntity.ok(
-                employeeService.updateEmployee(id, employee, departmentId)
+                employeeService.updateEmployee(id, request)
         );
     }
 
