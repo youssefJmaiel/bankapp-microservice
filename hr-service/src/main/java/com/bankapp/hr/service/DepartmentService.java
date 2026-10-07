@@ -1,5 +1,9 @@
 package com.bankapp.hr.service;
 
+import com.bankapp.hr.converter.DepartmentDtoConverter;
+import com.bankapp.hr.converter.DepartmentRequestConverter;
+import com.bankapp.hr.dto.DepartmentDto;
+import com.bankapp.hr.dto.DepartmentRequest;
 import com.bankapp.hr.entity.Department;
 import com.bankapp.hr.repository.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -14,28 +19,57 @@ import java.util.List;
 public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final DepartmentRequestConverter departmentRequestConverter;
+    private final DepartmentDtoConverter departmentDtoConverter;
 
-    public List<Department> getAllDepartments() {
-        return departmentRepository.findAll();
+    @Transactional
+    public List<DepartmentDto> getAllDepartments() {
+        return departmentRepository.findAll()
+                .stream()
+                .map(departmentDtoConverter::convert)
+                .collect(Collectors.toList());
     }
 
-    public Department getDepartmentById(Long id) {
-        return departmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
+    @Transactional
+    public DepartmentDto getDepartmentById(Long id) {
+        Department department = departmentRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Department not found with id: " + id)
+                );
+
+        return departmentDtoConverter.convert(department);
     }
 
-    public Department createDepartment(Department department) {
-        return departmentRepository.save(department);
+    @Transactional
+    public DepartmentDto createDepartment(DepartmentRequest request) {
+        Department department = departmentRequestConverter.convert(request);
+
+        Department savedDepartment = departmentRepository.save(department);
+
+        return departmentDtoConverter.convert(savedDepartment);
     }
 
-    public Department updateDepartment(Long id, Department updatedDepartment) {
-        Department dept = getDepartmentById(id);
-        dept.setName(updatedDepartment.getName());
-        return departmentRepository.save(dept);
+    @Transactional
+    public DepartmentDto updateDepartment(Long id, DepartmentRequest request) {
+        Department department = departmentRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Department not found with id: " + id)
+                );
+
+        department.setName(request.getName());
+
+        Department updatedDepartment = departmentRepository.save(department);
+
+        return departmentDtoConverter.convert(updatedDepartment);
     }
 
+    @Transactional
     public void deleteDepartment(Long id) {
-        Department dept = getDepartmentById(id);
-        departmentRepository.delete(dept);
+        Department department = departmentRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Department not found with id: " + id)
+                );
+
+        departmentRepository.delete(department);
     }
 }
