@@ -1,7 +1,8 @@
 package com.bankapp.mission.controller;
 
-import com.bankapp.mission.dto.EmployeeDTO;
-import com.bankapp.mission.entity.Mission;
+import com.bankapp.hr.dto.EmployeeDto;
+import com.bankapp.mission.dto.MissionDto;
+import com.bankapp.mission.dto.MissionRequest;
 import com.bankapp.mission.service.MissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,33 +22,34 @@ public class MissionController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<List<Mission>> getAllMissions() {
+    public ResponseEntity<List<MissionDto>> getAllMissions() {
         return ResponseEntity.ok(missionService.getAllMissions());
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<Mission> getMissionById(@PathVariable Long id) {
+    public ResponseEntity<MissionDto> getMissionById(@PathVariable Long id) {
         return ResponseEntity.ok(missionService.getMissionById(id));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Mission> createMission(
-            @Valid @RequestBody Mission mission) {
+    public ResponseEntity<MissionDto> createMission(
+            @Valid @RequestBody MissionRequest request) {
 
-        Mission savedMission = missionService.createMission(mission);
+        MissionDto savedMission = missionService.createMission(request);
+
         return new ResponseEntity<>(savedMission, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Mission> updateMission(
+    public ResponseEntity<MissionDto> updateMission(
             @PathVariable Long id,
-            @Valid @RequestBody Mission updatedMission) {
+            @Valid @RequestBody MissionRequest request) {
 
         return ResponseEntity.ok(
-                missionService.updateMission(id, updatedMission)
+                missionService.updateMission(id, request)
         );
     }
 
@@ -60,13 +62,13 @@ public class MissionController {
 
     @GetMapping("/{id}/employee")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<EmployeeDTO> getAssignedEmployee(
+    public ResponseEntity<EmployeeDto> getAssignedEmployee(
             @PathVariable Long id) {
 
-        Mission mission = missionService.getMissionById(id);
+        MissionDto mission = missionService.getMissionById(id);
 
-        EmployeeDTO employee =
-                (EmployeeDTO) missionService.getAssignedEmployee(
+        EmployeeDto employee =
+                missionService.getAssignedEmployee(
                         mission.getAssignedEmployeeId()
                 );
 

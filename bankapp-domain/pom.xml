@@ -21,6 +21,7 @@
 
     <modules>
         <module>hr-domain</module>
+        <module>mission-domain</module>
     </modules>
 
     <build>

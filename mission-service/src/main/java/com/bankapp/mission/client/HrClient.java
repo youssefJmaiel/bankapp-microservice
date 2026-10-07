@@ -1,18 +1,18 @@
 package com.bankapp.mission.client;
 
-import com.bankapp.mission.dto.EmployeeDTO; // Crée un DTO simple avec id, firstName, lastName
+import com.bankapp.hr.dto.EmployeeDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "hr-service", url = "http://localhost:8083/api")
+@FeignClient(name = "hr-service")
 public interface HrClient {
 
-    @GetMapping("/employees")
-    List<EmployeeDTO> getAllEmployees();
+    @GetMapping("/api/employees")
+    List<EmployeeDto> getAllEmployees();
 
-    @GetMapping("/employees/{id}")
-    EmployeeDTO getEmployeeById(@PathVariable("id") Long id);
+    @GetMapping("/api/employees/{id}")
+    EmployeeDto getEmployeeById(@PathVariable("id") Long id);
 }
