@@ -1,7 +1,6 @@
-package com.bankapp.messagerouter.repository;
+package com.bankapp.partner.repository;
 
-
-import com.bankapp.messagerouter.entity.Partner;
+import com.bankapp.partner.entity.Partner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

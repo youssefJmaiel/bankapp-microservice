@@ -32,8 +32,8 @@ spring:
           predicates:
             - Path=/api/messages/**,/api/message/**
 
-        - id: message-router-partners
-          uri: lb://MESSAGE-ROUTER
+        - id: partner-service
+          uri: lb://PARTNER-SERVICE
           predicates:
             - Path=/api/partners/**
 

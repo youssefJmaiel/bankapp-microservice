@@ -1,7 +1,6 @@
 package com.bankapp.messagerouter.config;
 
 import com.bankapp.messagerouter.error.MessageNotFoundException;
-import com.bankapp.messagerouter.error.PartnerNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,12 +27,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleEOFException(EOFException e) {
         log.warn("Client disconnected prematurely: {}", getExceptionMessage(e));
         return new ResponseEntity<>("Client disconnected prematurely", HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(PartnerNotFoundException.class)
-    public ResponseEntity<String> handlePartnerNotFound(PartnerNotFoundException ex) {
-        log.warn("Partner not found: {}", getExceptionMessage(ex));
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getExceptionMessage(ex));
     }
 
     @ExceptionHandler(MessageNotFoundException.class)

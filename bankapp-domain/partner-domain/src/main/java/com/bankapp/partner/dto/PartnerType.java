@@ -1,4 +1,4 @@
-package com.bankapp.messagerouter.entity;
+package com.bankapp.partner.dto;
 
 public enum PartnerType {
     MESSAGE,

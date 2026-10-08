@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-partner-schema
+      author: youssef
+      changes:
+        - sql:
+            sql: CREATE SCHEMA IF NOT EXISTS partner_schema
+
+  - changeSet:
+      id: 002-create-partners
+      author: youssef
+      changes:
+        - createTable:
+            tableName: partners
+            schemaName: partner_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: alias
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: direction
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: application
+                  type: VARCHAR(255)
+              - column:
+                  name: processed_flow_type
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false

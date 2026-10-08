@@ -120,6 +120,35 @@ services:
       - bankapp
 
   # =====================================================
+  # PARTNER SERVICE
+  # =====================================================
+  partner-service:
+    build:
+      context: ./partner-service
+      dockerfile: Dockerfile
+    container_name: bankapp-partner
+    ports:
+      - "8087:8087"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/bankapp
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: partner_schema
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_DEFAULT_SCHEMA: partner_schema
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+    networks:
+      - bankapp
+
+  # =====================================================
   # GATEWAY
   # =====================================================
   gateway-service:
