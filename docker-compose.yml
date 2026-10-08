@@ -53,6 +53,8 @@ services:
       SPRING_LIQUIBASE_ENABLED: "true"
       SPRING_LIQUIBASE_DEFAULT_SCHEMA: hr_schema
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -81,6 +83,8 @@ services:
       SPRING_LIQUIBASE_ENABLED: "true"
       SPRING_LIQUIBASE_DEFAULT_SCHEMA: mission_schema
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -111,6 +115,8 @@ services:
       SPRING_LIQUIBASE_ENABLED: "true"
       SPRING_LIQUIBASE_DEFAULT_SCHEMA: message_schema
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -122,6 +128,29 @@ services:
   # =====================================================
   # PARTNER SERVICE
   # =====================================================
+  bankapp-notification:
+    build:
+      context: ./bankapp-notification
+      dockerfile: Dockerfile
+    container_name: bankapp-notification
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8086:8086"
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_SMTP_AUTH: "false"
+      MAIL_SMTP_STARTTLS: "false"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+    depends_on:
+      - discovery-server
+      - mailpit
+    networks:
+      - bankapp
+
   partner-service:
     build:
       context: ./partner-service
@@ -141,6 +170,8 @@ services:
       SPRING_LIQUIBASE_ENABLED: "true"
       SPRING_LIQUIBASE_DEFAULT_SCHEMA: partner_schema
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -187,6 +218,18 @@ services:
     stdin_open: true
     tty: true
     restart: always
+    networks:
+      - bankapp
+
+  # =====================================================
+  # MAILPIT - LOCAL EMAIL TESTING
+  # =====================================================
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: bankapp-mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
     networks:
       - bankapp
 

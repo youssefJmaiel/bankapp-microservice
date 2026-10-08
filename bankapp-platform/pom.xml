@@ -38,6 +38,7 @@
 		<module>../mission-service</module>
 		<module>../message-router</module>
 		<module>../partner-service</module>
+		<module>../bankapp-notification</module>
 		<module>../common</module>
 	</modules>
 

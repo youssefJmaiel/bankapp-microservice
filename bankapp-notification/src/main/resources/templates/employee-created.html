@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to BankApp</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: Arial, sans-serif;">
+
+<div style="max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden;">
+
+    <div style="padding: 24px; text-align: center;">
+        <h1 style="margin: 0;">BankApp</h1>
+        <p style="margin: 8px 0 0;">Employee Notification</p>
+    </div>
+
+    <div style="padding: 32px;">
+        <h2>Welcome, <span th:text="${firstName}">First Name</span>!</h2>
+
+        <p>
+            Your employee profile has been successfully created in BankApp.
+        </p>
+
+        <p>
+            <strong>Name:</strong>
+            <span th:text="${firstName + ' ' + lastName}">Employee Name</span>
+        </p>
+
+        <p>
+            <strong>Email:</strong>
+            <span th:text="${email}">employee@example.com</span>
+        </p>
+
+        <p>
+            You can now use your BankApp account according to your assigned permissions.
+        </p>
+
+        <p style="margin-top: 32px;">
+            Best regards,<br>
+            <strong>BankApp Team</strong>
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

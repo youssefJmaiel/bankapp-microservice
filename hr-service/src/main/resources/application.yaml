@@ -10,7 +10,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8081/realms/spring-app
-          jwk-set-uri: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+          jwk-set-uri: http://localhost:8081/realms/spring-app/protocol/openid-connect/certs
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/bankapp}
