@@ -1,7 +1,7 @@
 package com.bankapp.messagerouter.controller;
 
-import com.bankapp.messagerouter.dto.MessageRequest;
-import com.bankapp.messagerouter.entity.Message;
+import com.bankapp.message.dto.MessageDto;
+import com.bankapp.message.dto.MessageRequest;
 import com.bankapp.messagerouter.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,26 +28,28 @@ public class MessageController {
 
     @GetMapping("/messages/my")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public List<Message> getMyMessages(@AuthenticationPrincipal Jwt jwt) {
+    public List<MessageDto> getMyMessages(
+            @AuthenticationPrincipal Jwt jwt) {
+
         String username = jwt.getClaimAsString("preferred_username");
+
         return messageService.getMessagesForReceiver(username);
     }
 
-
     @GetMapping("/messages")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<Message> getAllMessages() {
+    public List<MessageDto> getAllMessages() {
         return messageService.getAllMessages();
     }
 
     @GetMapping("/messages/paged")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<Message>> getMessagesPaged(
+    public ResponseEntity<Page<MessageDto>> getMessagesPaged(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "timestamp") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction
-    ) {
+            @RequestParam(defaultValue = "desc") String direction) {
+
         return ResponseEntity.ok(
                 messageService.getMessagesPaginated(
                         page,
@@ -60,40 +62,49 @@ public class MessageController {
 
     @GetMapping("/message/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<Message> getMessageById(@PathVariable Long id) {
-        Message message = messageService.getMessageById(id);
-        return ResponseEntity.ok(message);
+    public ResponseEntity<MessageDto> getMessageById(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                messageService.getMessageById(id)
+        );
     }
 
     @PostMapping("/message")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Message> saveMessage(@RequestBody Message message) {
+    public ResponseEntity<MessageDto> saveMessage(
+            @Valid @RequestBody MessageRequest messageRequest) {
+
         return new ResponseEntity<>(
-                messageService.saveMessage(message),
+                messageService.saveMessage(messageRequest),
                 HttpStatus.CREATED
         );
     }
 
     @DeleteMapping("/message/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteMessage(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMessage(
+            @PathVariable Long id) {
+
         messageService.deleteMessage(id);
+
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/message/send")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Message> sendMessage(
-            @Valid @RequestBody MessageRequest messageRequest
-    ) {
-        log.info("Received message request: {}", messageRequest);
+    public ResponseEntity<MessageDto> sendMessage(
+            @Valid @RequestBody MessageRequest messageRequest) {
 
-        Message message = messageService.sendMessage(
-                messageRequest.getContent(),
+        log.info(
+                "Received message request: sender={}, receiver={}",
                 messageRequest.getSender(),
                 messageRequest.getReceiver()
         );
 
-        return new ResponseEntity<>(message, HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                messageService.sendMessage(messageRequest),
+                HttpStatus.CREATED
+        );
     }
 }

@@ -1,12 +1,13 @@
 package com.bankapp.messagerouter.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
 import lombok.Data;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -14,26 +15,33 @@ import java.time.LocalDateTime;
 @Table(name = "messages")
 @Data
 public class Message implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty("id")
     private Long id;
-    @NotNull
-    @JsonProperty("content")  // Ici, on renomme le champ en "text" dans le JSON
+
     private String content;
-    @NotNull
+
     private String sender;
-    @NotNull
+
     private String receiver;
-    @NotNull
+
     private LocalDateTime timestamp;
 
     @Column(nullable = false)
     private boolean processed;
 
-    public Message() {}
+    public Message() {
+    }
 
-    public Message(Long id, String content, String sender, String receiver, LocalDateTime timestamp, boolean processed) {
+    public Message(
+            Long id,
+            String content,
+            String sender,
+            String receiver,
+            LocalDateTime timestamp,
+            boolean processed) {
+
         this.id = id;
         this.content = content;
         this.sender = sender;
@@ -42,7 +50,3 @@ public class Message implements Serializable {
         this.processed = processed;
     }
 }
-
-
-
-

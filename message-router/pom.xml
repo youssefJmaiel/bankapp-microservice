@@ -38,6 +38,13 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<!-- Shared Message Domain -->
+		<dependency>
+			<groupId>com.bankapp</groupId>
+			<artifactId>message-domain</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
 		<!-- Eureka Client -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

@@ -1,17 +1,24 @@
 package com.bankapp.messagerouter.service;
 
+import com.bankapp.message.dto.MessageDto;
+import com.bankapp.message.dto.MessageRequest;
+import com.bankapp.messagerouter.converter.MessageDtoConverter;
+import com.bankapp.messagerouter.converter.MessageRequestConverter;
 import com.bankapp.messagerouter.entity.Message;
 import com.bankapp.messagerouter.error.MessageNotFoundException;
 import com.bankapp.messagerouter.repository.MessageRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageService {
@@ -19,27 +26,38 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final MqService mqService;
     private final ObjectMapper objectMapper;
+    private final MessageDtoConverter messageDtoConverter;
+    private final MessageRequestConverter messageRequestConverter;
 
     public MessageService(
             MessageRepository messageRepository,
             MqService mqService,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            MessageDtoConverter messageDtoConverter,
+            MessageRequestConverter messageRequestConverter) {
 
         this.messageRepository = messageRepository;
         this.mqService = mqService;
         this.objectMapper = objectMapper;
+        this.messageDtoConverter = messageDtoConverter;
+        this.messageRequestConverter = messageRequestConverter;
     }
 
-    public List<Message> getMessagesForReceiver(String receiver) {
-        return messageRepository.findByReceiver(receiver);
+    public List<MessageDto> getMessagesForReceiver(String receiver) {
+        return messageRepository.findByReceiver(receiver)
+                .stream()
+                .map(messageDtoConverter::toDto)
+                .collect(Collectors.toList());
     }
 
-
-    public List<Message> getAllMessages() {
-        return messageRepository.findAll();
+    public List<MessageDto> getAllMessages() {
+        return messageRepository.findAll()
+                .stream()
+                .map(messageDtoConverter::toDto)
+                .collect(Collectors.toList());
     }
 
-    public Page<Message> getMessagesPaginated(
+    public Page<MessageDto> getMessagesPaginated(
             int page,
             int size,
             String sortBy,
@@ -51,11 +69,15 @@ public class MessageService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return messageRepository.findAll(pageable);
+        return messageRepository.findAll(pageable)
+                .map(messageDtoConverter::toDto);
     }
 
-    public Message saveMessage(Message message) {
-        return messageRepository.save(message);
+    public MessageDto saveMessage(MessageRequest request) {
+        Message message = messageRequestConverter.toEntity(request);
+        Message savedMessage = messageRepository.save(message);
+
+        return messageDtoConverter.toDto(savedMessage);
     }
 
     public void deleteMessage(Long id) {
@@ -68,25 +90,19 @@ public class MessageService {
         }
     }
 
-    public Message getMessageById(Long id) {
-        return messageRepository.findById(id)
+    public MessageDto getMessageById(Long id) {
+        Message message = messageRepository.findById(id)
                 .orElseThrow(() -> new MessageNotFoundException(
                         "Message with ID " + id + " not found"
                 ));
+
+        return messageDtoConverter.toDto(message);
     }
 
-    public Message sendMessage(
-            String content,
-            String sender,
-            String receiver) {
+    public MessageDto sendMessage(MessageRequest request) {
 
-        // 1. Create the message
-        Message message = new Message();
-        message.setContent(content);
-        message.setSender(sender);
-        message.setReceiver(receiver);
-        message.setTimestamp(LocalDateTime.now());
-        message.setProcessed(false);
+        // 1. Convert the request to the JPA entity
+        Message message = messageRequestConverter.toEntity(request);
 
         // 2. Save it in the database first
         Message savedMessage = messageRepository.save(message);
@@ -113,6 +129,7 @@ public class MessageService {
             );
         }
 
-        return savedMessage;
+        // 6. Return the DTO
+        return messageDtoConverter.toDto(savedMessage);
     }
 }

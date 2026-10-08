@@ -23,6 +23,7 @@
         <module>hr-domain</module>
         <module>mission-domain</module>
         <module>partner-domain</module>
+        <module>message-domain</module>
     </modules>
 
     <build>
