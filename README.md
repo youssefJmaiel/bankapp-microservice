@@ -124,6 +124,13 @@ flowchart TB
 
     MSG -->|"Asynchronous Messaging"| MQ
     MQ -->|"Message Consumption"| MSG
+
+    Notification[bankapp-notification :8086]
+    SMTP[SMTP Server]
+    Mailpit[Mailpit :8025 Web UI / :1025 SMTP]
+    Notification -->|Service registration| Eureka
+    Notification --> SMTP
+    SMTP -. Local email testing .-> Mailpit
 ```
 
 ---
@@ -468,6 +475,9 @@ This allows the Gateway to route requests without hard-coding individual contain
 
 ---
 
+
+**Notification service:** `bankapp-notification` runs on port `8086` and exposes its notification endpoint directly. It uses SMTP for email delivery and Mailpit for local testing. The inspected Gateway configuration does not currently define a `/api/notifications/**` route, and automatic invocation from HR has not been confirmed.
+
 # 🧩 Microservices
 
 | Service              |   Port | Responsibility                  |
@@ -475,6 +485,7 @@ This allows the Gateway to route requests without hard-coding individual contain
 | **Gateway Service**  | `8082` | Central API Gateway and routing |
 | **HR Service**       | `8083` | Employees and departments       |
 | **Mission Service**  | `8084` | Mission management              |
+| **Notification Service** | `8086` | Email notifications via SMTP and Thymeleaf |
 | **Message Router**   | `8085` | Banking messages and IBM MQ     |
 | **Partner Service**  | `8087` | Partner management              |
 | **Discovery Server** | `8761` | Eureka service discovery        |
@@ -1337,6 +1348,7 @@ bankapp-microservice/
 │
 ├── bankapp-domain/
 │
+├── bankapp-notification/       # Email notification microservice
 ├── bankapp-platform/
 │
 ├── career-service/
