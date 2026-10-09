@@ -43,3 +43,10 @@ eureka:
   client:
     service-url:
       defaultZone: http://discovery-server:8761/eureka/
+
+keycloak:
+  admin:
+    base-url: ${KEYCLOAK_ADMIN_BASE_URL:http://localhost:8081}
+    realm: ${KEYCLOAK_ADMIN_REALM:spring-app}
+    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:bankapp-admin}
+    client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}

@@ -55,6 +55,10 @@ services:
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+      KEYCLOAK_ADMIN_BASE_URL: http://keycloak-dev:8080
+      KEYCLOAK_ADMIN_REALM: spring-app
+      KEYCLOAK_ADMIN_CLIENT_ID: ${KEYCLOAK_ADMIN_CLIENT_ID}
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

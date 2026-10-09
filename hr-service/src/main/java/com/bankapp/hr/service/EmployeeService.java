@@ -1,20 +1,16 @@
 package com.bankapp.hr.service;
 
-import com.bankapp.hr.client.NotificationClient;
 import com.bankapp.hr.converter.EmployeeDtoConverter;
 import com.bankapp.hr.converter.EmployeeRequestConverter;
 import com.bankapp.hr.dto.EmployeeDto;
 import com.bankapp.hr.dto.EmployeeRequest;
-import com.bankapp.notification.dto.MailRequest;
 import com.bankapp.hr.entity.Employee;
 import com.bankapp.hr.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,7 +21,7 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final EmployeeRequestConverter employeeRequestConverter;
     private final EmployeeDtoConverter employeeDtoConverter;
-    private final NotificationClient notificationClient;
+    private final KeycloakAdminService keycloakAdminService;
 
     @Transactional
     public List<EmployeeDto> getAllEmployees() {
@@ -51,20 +47,9 @@ public class EmployeeService {
 
         Employee savedEmployee = employeeRepository.save(employee);
 
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("firstName", savedEmployee.getFirstName());
-        variables.put("lastName", savedEmployee.getLastName());
-        variables.put("email", savedEmployee.getEmail());
-
-        MailRequest mailRequest = MailRequest.builder()
-                .to(savedEmployee.getEmail())
-                .subject("Welcome to BankApp")
-                .template("employee-created")
-                .locale("en")
-                .variables(variables)
-                .build();
-
-        notificationClient.sendMail(mailRequest);
+        // Crée le compte Keycloak, attribue le rôle USER
+        // et envoie l'e-mail de vérification et de définition du mot de passe.
+        keycloakAdminService.createAndActivateEmployee(savedEmployee);
 
         return employeeDtoConverter.convert(savedEmployee);
     }
