@@ -1,0 +1,93 @@
+spring:
+  application:
+    name: message-router
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/bankapp}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.postgresql.Driver}
+    username: ${SPRING_DATASOURCE_USERNAME:bankapp}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: message_schema
+    open-in-view: false
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: message_schema
+    liquibase-schema: message_schema
+
+  jackson:
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSS
+    serialization:
+      write-dates-as-timestamps: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+
+  jms:
+    pub-sub-domain: false
+    listener:
+      destination-name: DEV.QUEUE.1
+      concurrency: 1
+      max-concurrency: 5
+
+server:
+  port: 8085
+  connection-timeout: 20s
+  tomcat:
+    max-connections: 0
+    max-threads: 200
+    accept-count: 100
+    max-swallow-size: -1
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    url: /api-docs
+    display-request-duration: true
+    deep-linking: true
+    doc-expansion: none
+    operations-sorter: alpha
+    tags-sorter: alpha
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    com.bankapp: INFO
+    com.ibm.mq: INFO
+    org.apache.coyote: WARN
+    org.apache.tomcat: WARN
+
+ibm:
+  mq:
+    host: ibm-mq
+    port: 1414
+    queueManager: QM1
+    channel: DEV.APP.SVRCONN
+    inputQueue: DEV.QUEUE.1
+    outputQueue: DEV.QUEUE.2
+    connName: ibm-mq(1414)
+    user: ${MQ_USER_IBM}
+    password: ${MQ_PASSWORD_IBM}
+    transport: TCP
+    client: true
+    maxConnections: 10
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka/

@@ -31,5 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
-application.yml
+# Local application configuration (use application.yaml.example as template)
 .env
