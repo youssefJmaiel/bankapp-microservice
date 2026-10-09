@@ -142,11 +142,13 @@ services:
     ports:
       - "8086:8086"
     environment:
+      MAIL_USERNAME: '${MAIL_USERNAME:-}'
+      MAIL_PASSWORD: '${MAIL_PASSWORD:-}'
       EUREKA_URL: http://discovery-server:8761/eureka/
-      MAIL_HOST: mailpit
-      MAIL_PORT: 1025
-      MAIL_SMTP_AUTH: "false"
-      MAIL_SMTP_STARTTLS: "false"
+      MAIL_HOST: '${MAIL_HOST:-smtp.gmail.com}'
+      MAIL_PORT: '${MAIL_PORT:-587}'
+      MAIL_SMTP_AUTH: '${MAIL_SMTP_AUTH:-true}'
+      MAIL_SMTP_STARTTLS: '${MAIL_SMTP_STARTTLS:-true}'
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
     depends_on:

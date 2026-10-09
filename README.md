@@ -126,11 +126,11 @@ flowchart TB
     MQ -->|"Message Consumption"| MSG
 
     Notification[bankapp-notification :8086]
-    SMTP[SMTP Server]
-    Mailpit[Mailpit :8025 Web UI / :1025 SMTP]
+    SMTP[Configurable SMTP provider<br/>Gmail or another provider]
+    Mailpit[Optional local Mailpit<br/>SMTP :1025 / Web UI :8025]
     Notification -->|Service registration| Eureka
-    Notification --> SMTP
-    SMTP -. Local email testing .-> Mailpit
+    Notification -->|Configured SMTP| SMTP
+    Notification -. Optional local testing .-> Mailpit
 ```
 
 ---
@@ -730,7 +730,7 @@ BankApp contains a dedicated notification service named `bankapp-notification` f
 | Default port | `8086` |
 | Template engine | Thymeleaf |
 | Email delivery | Spring `JavaMailSender` over SMTP |
-| Local SMTP server | Mailpit on port `1025` |
+| SMTP configuration | Gmail by default in Docker Compose (`smtp.gmail.com:587`, STARTTLS) |
 | Mailpit web interface | `http://localhost:8025` |
 
 ## Email processing
@@ -766,7 +766,7 @@ The `to` field must contain a valid email address. `to`, `subject` and `template
 
 ## Local email testing
 
-When the development Mailpit container is running, inspect captured messages at `http://localhost:8025`. The service's default local SMTP configuration uses `localhost:1025`; set `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME` and `MAIL_PASSWORD` to match the environment. SMTP authentication and STARTTLS are disabled by default in the supplied local configuration and should be configured appropriately for a real mail provider.
+Docker Compose defaults to Gmail SMTP (`smtp.gmail.com:587`) with authentication and STARTTLS enabled. Set `MAIL_USERNAME` and `MAIL_PASSWORD` in your local `.env` file; for Gmail, use an app password rather than your normal account password. Never commit real credentials. For local email testing, configure `MAIL_HOST=mailpit`, `MAIL_PORT=1025`, `MAIL_SMTP_AUTH=false` and `MAIL_SMTP_STARTTLS=false`, then inspect captured messages at `http://localhost:8025`. For another provider, adjust the SMTP variables to match its requirements.
 
 The service uses the configured Eureka URL through `EUREKA_URL` (default `http://localhost:8761/eureka/`). The inspected Gateway configuration does not define a `/api/notifications/**` route, so the documented endpoint is accessed directly on port `8086` unless a Gateway route is added.
 
