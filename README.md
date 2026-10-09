@@ -1398,6 +1398,23 @@ Shared domain components used by the application architecture.
 
 Shared platform-level components and infrastructure.
 
+### `bankapp-notification`
+
+Dedicated notification microservice responsible for email delivery within the BankApp ecosystem.
+
+**Main responsibilities:**
+- Exposes a REST endpoint at `POST /api/notifications/send` to request email delivery.
+- Sends HTML emails using Spring Boot, `JavaMailSender`, and Thymeleaf templates.
+- Renders email templates with dynamic variables, such as employee first name, last name, and email address.
+- Accepts notification details including recipient, subject, template name, locale, and template variables.
+- Supports configurable SMTP settings through environment variables.
+- Supports local email testing with Mailpit through the configured SMTP service.
+- Registers with Eureka for service discovery.
+
+**Technologies:** Java 17, Spring Boot, Spring Mail, Thymeleaf, REST API, Eureka, SMTP, and Mailpit for local testing.
+
+**Important distinction:** Employee account creation and activation are handled by the HR service and Keycloak. This notification microservice provides a separate email-sending API; automatic invocation by the HR service should not be assumed unless that integration is explicitly implemented.
+
 ### `career-service`
 
 Dedicated application service module related to career/business functionality.
