@@ -1860,3 +1860,37 @@ This project is licensed under the **MIT License**.
 ```
 
 This architecture demonstrates secure, discoverable, containerized and independently organized backend services integrated with a modern web frontend.
+
+
+## Employee Archive and Restore
+
+BankApp supports logical archiving and restoration of employee records. Instead of permanently deleting an employee from the database, the application marks the record as archived, preserving its history.
+
+### Features
+
+- **Archive employees:** Administrators can archive an employee from the Employees page.
+- **View archived employees:** A dedicated Archived view displays archived records.
+- **Restore employees:** Administrators can restore an archived employee to the active employees list.
+- **Preserve employee history:** Archived records remain in PostgreSQL; the `archived` flag is separate from the employee's employment status.
+- **Database migration:** Liquibase migration `005-add-employee-archive.yaml` adds the non-nullable `archived` column, defaulting to `false` for existing records.
+
+### Backend API
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/employees` | List active employees |
+| `GET` | `/api/employees/archived` | List archived employees |
+| `DELETE` | `/api/employees/{id}` | Logically archive an employee |
+| `POST` | `/api/employees/{id}/restore` | Restore an archived employee |
+
+The archive and restore endpoints are protected by the application's existing authorization rules.
+
+### Frontend
+
+The Employees page provides separate active and archived views. Administrators can archive active employees and restore archived records. The existing employee form and other pages remain separate from this feature.
+
+### Validation
+
+- Frontend production build completed successfully with Vite.
+- Backend Maven compilation and packaging completed successfully.
+- Archive, archived-list retrieval, and restore API operations were tested successfully.
