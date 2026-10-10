@@ -9,6 +9,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
+    java.util.List<Employee> findByArchivedFalse();
+
+    java.util.Optional<Employee> findByIdAndArchivedFalse(Long id);
+
+    java.util.List<Employee> findByArchivedTrue();
+
+
     boolean existsByEmail(String email);
 
     boolean existsByEmailAndIdNot(String email, Long id);

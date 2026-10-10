@@ -26,7 +26,7 @@ public class EmployeeService {
 
     @Transactional
     public List<EmployeeDto> getAllEmployees() {
-        return employeeRepository.findAll()
+        return employeeRepository.findByArchivedFalse()
                 .stream()
                 .map(employeeDtoConverter::convert)
                 .collect(Collectors.toList());
@@ -34,7 +34,7 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeDto getEmployeeById(Long id) {
-        Employee employee = employeeRepository.findById(id)
+        Employee employee = employeeRepository.findByIdAndArchivedFalse(id)
                 .orElseThrow(() ->
                         new RuntimeException("Employee not found with id: " + id)
                 );
@@ -61,7 +61,7 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeDto updateEmployee(Long id, EmployeeRequest request) {
-        Employee employee = employeeRepository.findById(id)
+        Employee employee = employeeRepository.findByIdAndArchivedFalse(id)
                 .orElseThrow(() ->
                         new RuntimeException("Employee not found with id: " + id)
                 );
@@ -92,11 +92,36 @@ public class EmployeeService {
 
     @Transactional
     public void deleteEmployee(Long id) {
+        Employee employee = employeeRepository.findByIdAndArchivedFalse(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Employee not found with id: " + id)
+                );
+
+        employee.setArchived(true);
+        employeeRepository.save(employee);
+    }
+
+    @Transactional
+    public List<EmployeeDto> getArchivedEmployees() {
+        return employeeRepository.findByArchivedTrue()
+                .stream()
+                .map(employeeDtoConverter::convert)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public EmployeeDto restoreEmployee(Long id) {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Employee not found with id: " + id)
                 );
 
-        employeeRepository.delete(employee);
+        if (!employee.isArchived()) {
+            throw new RuntimeException("Employee is not archived: " + id);
+        }
+
+        employee.setArchived(false);
+        Employee restoredEmployee = employeeRepository.save(employee);
+        return employeeDtoConverter.convert(restoredEmployee);
     }
 }

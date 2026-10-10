@@ -51,4 +51,7 @@ public class Employee implements Serializable {
 
     @Column(name = "status", length = 20)
     private String status;
+
+    @Column(name = "archived", nullable = false)
+    private boolean archived;
 }

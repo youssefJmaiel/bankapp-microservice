@@ -24,6 +24,18 @@ public class EmployeeController {
         return employeeService.getAllEmployees();
     }
 
+    @GetMapping("/archived")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<EmployeeDto> getArchivedEmployees() {
+        return employeeService.getArchivedEmployees();
+    }
+
+    @PostMapping("/{id}/restore")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<EmployeeDto> restoreEmployee(@PathVariable Long id) {
+        return ResponseEntity.ok(employeeService.restoreEmployee(id));
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<EmployeeDto> getEmployee(@PathVariable Long id) {

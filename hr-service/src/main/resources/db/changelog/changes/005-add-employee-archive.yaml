@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-add-employee-archive
+      author: youssef
+      changes:
+        - addColumn:
+            schemaName: hr_schema
+            tableName: employees
+            columns:
+              - column:
+                  name: archived
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
