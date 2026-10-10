@@ -23,6 +23,11 @@ public class EmployeeRequestConverter {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
+                .phone(request.getPhone())
+                .position(request.getPosition())
+                .hireDate(request.getHireDate())
+                .salary(request.getSalary())
+                .status(request.getStatus())
                 .build();
 
         if (request.getDepartmentId() != null) {

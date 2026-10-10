@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/changes/002-create-employees.yaml
   - include:
       file: db/changelog/changes/003-unique-employee-email.yaml
+  - include:
+      file: db/changelog/changes/004-add-employee-details.yaml

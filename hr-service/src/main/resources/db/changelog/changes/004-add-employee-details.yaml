@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-add-employee-details
+      author: youssef
+      changes:
+        - addColumn:
+            schemaName: hr_schema
+            tableName: employees
+            columns:
+              - column:
+                  name: phone
+                  type: VARCHAR(50)
+              - column:
+                  name: position
+                  type: VARCHAR(150)
+              - column:
+                  name: hire_date
+                  type: DATE
+              - column:
+                  name: salary
+                  type: NUMERIC(12,2)
+              - column:
+                  name: status
+                  type: VARCHAR(20)

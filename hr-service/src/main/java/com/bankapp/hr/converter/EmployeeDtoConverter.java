@@ -16,10 +16,13 @@ public class EmployeeDtoConverter {
         }
 
         DepartmentDto departmentDto = null;
+        Long departmentId = null;
 
         Department department = employee.getDepartment();
 
         if (department != null) {
+            departmentId = department.getId();
+
             departmentDto = DepartmentDto.builder()
                     .id(department.getId())
                     .name(department.getName())
@@ -31,7 +34,13 @@ public class EmployeeDtoConverter {
                 .firstName(employee.getFirstName())
                 .lastName(employee.getLastName())
                 .email(employee.getEmail())
+                .phone(employee.getPhone())
+                .position(employee.getPosition())
                 .department(departmentDto)
+                .departmentId(departmentId)
+                .hireDate(employee.getHireDate())
+                .salary(employee.getSalary())
+                .status(employee.getStatus())
                 .build();
     }
 }

@@ -102,10 +102,6 @@ public class SecurityConfig {
         NimbusReactiveJwtDecoder decoder =
                 NimbusReactiveJwtDecoder.withJwkSetUri(JWK_SET_URI).build();
 
-        decoder.setJwtValidator(
-                token -> org.springframework.security.oauth2.core.OAuth2TokenValidatorResult.success()
-        );
-
         return decoder;
     }
 }

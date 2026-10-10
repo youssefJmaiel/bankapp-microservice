@@ -70,12 +70,18 @@ public class EmployeeService {
             throw new DuplicateEmailException(request.getEmail());
         }
 
+        Employee convertedEmployee = employeeRequestConverter.convert(request);
+
         employee.setFirstName(request.getFirstName());
         employee.setLastName(request.getLastName());
         employee.setEmail(request.getEmail());
+        employee.setPhone(request.getPhone());
+        employee.setPosition(request.getPosition());
+        employee.setHireDate(request.getHireDate());
+        employee.setSalary(request.getSalary());
+        employee.setStatus(request.getStatus());
 
         if (request.getDepartmentId() != null) {
-            Employee convertedEmployee = employeeRequestConverter.convert(request);
             employee.setDepartment(convertedEmployee.getDepartment());
         }
 
