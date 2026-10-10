@@ -980,6 +980,22 @@ Do not commit the resulting `.env` file.
 
 ---
 
+## 3. Build the Shared Domain Modules
+
+Before starting Docker, build the shared modules and the message-router JAR:
+
+```bash
+cd bankapp-domain && mvn install -DskipTests
+cd ../message-router
+cp src/main/resources/application.yaml.example src/main/resources/application.yaml
+mvn clean package -DskipTests
+cd ..
+```
+
+Configure IBM MQ credentials in the root `.env` file. Never commit real credentials.
+
+---
+
 ## 3. Start the Backend
 
 ```bash

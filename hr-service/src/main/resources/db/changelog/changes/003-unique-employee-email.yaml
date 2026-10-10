@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-unique-employee-email
+      author: youssef
+      changes:
+        - sql:
+            comment: Enforce case-insensitive uniqueness for employee emails
+            sql: CREATE UNIQUE INDEX uq_employees_email_normalized ON hr_schema.employees (lower(trim(email)))
+      rollback:
+        - sql:
+            sql: DROP INDEX IF EXISTS hr_schema.uq_employees_email_normalized

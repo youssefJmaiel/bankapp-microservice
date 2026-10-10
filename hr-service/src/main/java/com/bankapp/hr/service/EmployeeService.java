@@ -5,6 +5,7 @@ import com.bankapp.hr.converter.EmployeeRequestConverter;
 import com.bankapp.hr.dto.EmployeeDto;
 import com.bankapp.hr.dto.EmployeeRequest;
 import com.bankapp.hr.entity.Employee;
+import com.bankapp.hr.exception.DuplicateEmailException;
 import com.bankapp.hr.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,10 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeDto createEmployee(EmployeeRequest request) {
+        if (employeeRepository.existsByNormalizedEmail(request.getEmail())) {
+            throw new DuplicateEmailException(request.getEmail());
+        }
+
         Employee employee = employeeRequestConverter.convert(request);
 
         Employee savedEmployee = employeeRepository.save(employee);
@@ -60,6 +65,10 @@ public class EmployeeService {
                 .orElseThrow(() ->
                         new RuntimeException("Employee not found with id: " + id)
                 );
+
+        if (employeeRepository.existsByNormalizedEmailAndIdNot(request.getEmail(), id)) {
+            throw new DuplicateEmailException(request.getEmail());
+        }
 
         employee.setFirstName(request.getFirstName());
         employee.setLastName(request.getLastName());

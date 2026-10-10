@@ -5,11 +5,13 @@ import com.bankapp.hr.entity.Employee;
 import com.bankapp.hr.repository.DepartmentRepository;
 import com.bankapp.hr.repository.EmployeeRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@ConditionalOnProperty(name = "bankapp.data-loader.enabled", havingValue = "true", matchIfMissing = true)
 public class HrDataLoader implements CommandLineRunner {
 
     private final EmployeeRepository employeeRepository;

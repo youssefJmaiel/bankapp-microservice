@@ -1,0 +1,15 @@
+bankapp:
+  data-loader:
+    enabled: false
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:hr_test;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS hr_schema
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  liquibase:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
