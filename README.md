@@ -1224,8 +1224,6 @@ docs/screenshots/
 
 ## 👥 Employees
 
-![Archived Employees](docs/screenshots/employees-archieved.jpeg)
-
 
 ![Employees](docs/screenshots/03-employees.png)
 
@@ -1869,6 +1867,8 @@ This architecture demonstrates secure, discoverable, containerized and independe
 
 
 ## Employee Archive and Restore
+
+![Archived Employees](docs/screenshots/employees-archieved.jpeg)
 
 BankApp supports logical archiving and restoration of employee records. Instead of permanently deleting an employee from the database, the application marks the record as archived, preserving its history.
 
