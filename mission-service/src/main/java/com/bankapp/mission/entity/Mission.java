@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "missions")
@@ -33,4 +34,12 @@ public class Mission implements Serializable {
 
     @NotNull
     private Long assignedEmployeeId; // référence à Employee par ID seulement
+
+    private String location;
+
+    private String status = "PENDING";
+
+    private String priority = "MEDIUM";
+
+    private BigDecimal budget;
 }

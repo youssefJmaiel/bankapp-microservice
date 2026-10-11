@@ -20,6 +20,10 @@ public class MissionDtoConverter {
                 .startDate(mission.getStartDate())
                 .endDate(mission.getEndDate())
                 .assignedEmployeeId(mission.getAssignedEmployeeId())
+                .location(mission.getLocation())
+                .status(mission.getStatus())
+                .priority(mission.getPriority())
+                .budget(mission.getBudget())
                 .build();
     }
 }

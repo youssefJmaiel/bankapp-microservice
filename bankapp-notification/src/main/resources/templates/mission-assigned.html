@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle mission - BankApp</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: Arial, sans-serif; color: #263238;">
+
+<div style="max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden;">
+
+    <div style="padding: 24px; text-align: center; background-color: #17365d; color: #ffffff;">
+        <h1 style="margin: 0;">BankApp</h1>
+        <p style="margin: 8px 0 0;">Notification de mission</p>
+    </div>
+
+    <div style="padding: 32px;">
+        <h2>Bonjour <span th:text="${firstName}">Prénom</span>,</h2>
+
+        <p>Une nouvelle mission vient de vous être attribuée.</p>
+
+        <div style="padding: 20px; background-color: #f4f6f8; border-radius: 6px;">
+            <h3 style="margin-top: 0;" th:text="${missionTitle}">Titre de la mission</h3>
+
+            <p>
+                <strong>Description :</strong><br>
+                <span th:text="${missionDescription}">Description de la mission</span>
+            </p>
+
+            <p>
+                <strong>Date de début :</strong>
+                <span th:text="${startDate}">Date de début</span>
+            </p>
+
+            <p>
+                <strong>Date de fin :</strong>
+                <span th:text="${endDate}">Date de fin</span>
+            </p>
+        </div>
+
+        <p>Connectez-vous à BankApp pour consulter les détails de cette mission.</p>
+
+        <p style="margin-top: 32px;">
+            Cordialement,<br>
+            <strong>L'équipe BankApp</strong>
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

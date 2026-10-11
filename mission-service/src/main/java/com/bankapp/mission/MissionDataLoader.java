@@ -21,10 +21,25 @@ public class MissionDataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if(missionRepository.count() == 0) {
 
-            missionRepository.saveAll(List.of(
-                    new Mission(null, "Mission A", "Développer nouvelle fonctionnalité", LocalDateTime.now().minusDays(2), LocalDateTime.now().plusDays(5), 1L),
-                    new Mission(null, "Mission B", "Révision du process RH", LocalDateTime.now(), LocalDateTime.now().plusDays(3), 2L)
-            ));
+            Mission missionA = new Mission();
+            missionA.setTitle("Mission A");
+            missionA.setDescription("Développer nouvelle fonctionnalité");
+            missionA.setStartDate(LocalDateTime.now().minusDays(2));
+            missionA.setEndDate(LocalDateTime.now().plusDays(5));
+            missionA.setAssignedEmployeeId(1L);
+            missionA.setStatus("PENDING");
+            missionA.setPriority("MEDIUM");
+
+            Mission missionB = new Mission();
+            missionB.setTitle("Mission B");
+            missionB.setDescription("Révision du process RH");
+            missionB.setStartDate(LocalDateTime.now());
+            missionB.setEndDate(LocalDateTime.now().plusDays(3));
+            missionB.setAssignedEmployeeId(2L);
+            missionB.setStatus("PENDING");
+            missionB.setPriority("MEDIUM");
+
+            missionRepository.saveAll(List.of(missionA, missionB));
 
             System.out.println("Mission-Service: Missions loaded!");
         }

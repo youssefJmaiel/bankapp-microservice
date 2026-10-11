@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-add-mission-details
+      author: youssef
+      changes:
+        - addColumn:
+            schemaName: mission_schema
+            tableName: missions
+            columns:
+              - column:
+                  name: location
+                  type: VARCHAR(255)
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  defaultValue: PENDING
+                  constraints:
+                    nullable: false
+              - column:
+                  name: priority
+                  type: VARCHAR(30)
+                  defaultValue: MEDIUM
+                  constraints:
+                    nullable: false
+              - column:
+                  name: budget
+                  type: DECIMAL(19,2)
