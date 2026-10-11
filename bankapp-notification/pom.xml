@@ -69,6 +69,26 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- IBM MQ JMS -->
+        <dependency>
+            <groupId>com.ibm.mq</groupId>
+            <artifactId>com.ibm.mq.allclient</artifactId>
+            <version>9.4.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+            <version>5.3.30</version>
+        </dependency>
+
+        <!-- Shared mission event contract -->
+        <dependency>
+            <groupId>com.bankapp</groupId>
+            <artifactId>mission-domain</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
         <!-- Spring Boot Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -2,6 +2,8 @@ package com.bankapp.mission.service;
 
 import com.bankapp.mission.client.HrClient;
 import com.bankapp.mission.client.NotificationClient;
+import com.bankapp.mission.dto.MissionAssignedEvent;
+import com.bankapp.mission.messaging.MissionEventPublisher;
 import com.bankapp.notification.dto.MailRequest;
 import com.bankapp.mission.converter.MissionDtoConverter;
 import com.bankapp.mission.converter.MissionRequestConverter;
@@ -12,9 +14,12 @@ import com.bankapp.hr.dto.EmployeeDto;
 import com.bankapp.mission.repository.MissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.HashMap;
 import java.util.Map;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +40,10 @@ public class MissionService {
     private final MissionRepository missionRepository;
     private final HrClient hrClient;
     private final NotificationClient notificationClient;
+    private final MissionEventPublisher missionEventPublisher;
+
+    @Value("${mission.notifications.mq-enabled:false}")
+    private boolean mqNotificationsEnabled;
     private final MissionRequestConverter missionRequestConverter;
     private final MissionDtoConverter missionDtoConverter;
 
@@ -79,6 +88,27 @@ public class MissionService {
             if (employee == null || employee.getEmail() == null || employee.getEmail().isBlank()) {
                 LOGGER.warning("Notification non envoyée : adresse e-mail de l'employé absente pour la mission "
                         + mission.getId());
+                return;
+            }
+
+            if (mqNotificationsEnabled) {
+                MissionAssignedEvent event = MissionAssignedEvent.builder()
+                        .eventId(UUID.randomUUID())
+                        .occurredAt(LocalDateTime.now())
+                        .missionId(mission.getId())
+                        .missionTitle(mission.getTitle() == null ? "" : mission.getTitle())
+                        .missionDescription(mission.getDescription() == null ? "" : mission.getDescription())
+                        .startDate(mission.getStartDate())
+                        .endDate(mission.getEndDate())
+                        .assignedEmployeeId(mission.getAssignedEmployeeId())
+                        .recipientEmail(employee.getEmail())
+                        .recipientFirstName(
+                                employee.getFirstName() == null || employee.getFirstName().isBlank()
+                                        ? "collègue" : employee.getFirstName())
+                        .build();
+
+                missionEventPublisher.publishMissionAssigned(event);
+                LOGGER.info("Événement MQ publié pour la mission " + mission.getId());
                 return;
             }
 

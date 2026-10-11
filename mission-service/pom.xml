@@ -118,6 +118,13 @@
 			<version>${springdoc.version}</version>
 		</dependency>
 
+		<!-- IBM MQ JMS support -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jms</artifactId>
+			<version>5.3.30</version>
+		</dependency>
+
 		<!-- Spring Boot Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

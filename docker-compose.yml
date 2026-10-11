@@ -89,6 +89,14 @@ services:
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+      MQ_HOST: ibm-mq
+      MQ_PORT: '1414'
+      MQ_QUEUE_MANAGER: QM1
+      MQ_CHANNEL: DEV.APP.SVRCONN
+      MQ_USER_IBM: ${MQ_USER_IBM}
+      MQ_PASSWORD_IBM: ${MQ_PASSWORD_IBM}
+      MQ_MISSION_ASSIGNED_QUEUE: MISSION.ASSIGNED
+      MISSION_NOTIFICATIONS_MQ_ENABLED: ${MISSION_NOTIFICATIONS_MQ_ENABLED:-false}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -151,6 +159,13 @@ services:
       MAIL_SMTP_STARTTLS: '${MAIL_SMTP_STARTTLS:-true}'
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+      MQ_HOST: ibm-mq
+      MQ_PORT: '1414'
+      MQ_QUEUE_MANAGER: QM1
+      MQ_CHANNEL: DEV.APP.SVRCONN
+      MQ_USER_IBM: ${MQ_USER_IBM}
+      MQ_PASSWORD_IBM: ${MQ_PASSWORD_IBM}
+      MQ_MISSION_ASSIGNED_QUEUE: MISSION.ASSIGNED
     depends_on:
       - discovery-server
       - mailpit

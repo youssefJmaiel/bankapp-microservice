@@ -41,3 +41,14 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
+# IBM MQ - mission assignment events
+ibm:
+  mq:
+    host: ${MQ_HOST:ibm-mq}
+    port: ${MQ_PORT:1414}
+    queue-manager: ${MQ_QUEUE_MANAGER:QM1}
+    channel: ${MQ_CHANNEL:DEV.APP.SVRCONN}
+    user: ${MQ_USER_IBM}
+    password: ${MQ_PASSWORD_IBM}
+    mission-assigned-queue: ${MQ_MISSION_ASSIGNED_QUEUE:MISSION.ASSIGNED}

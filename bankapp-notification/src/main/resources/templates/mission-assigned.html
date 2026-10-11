@@ -5,48 +5,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nouvelle mission - BankApp</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: Arial, sans-serif; color: #263238;">
+<body style="margin:0; padding:0; background-color:#f3f5f9; font-family:Arial,Helvetica,sans-serif; color:#263445;">
 
-<div style="max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+       style="background-color:#f3f5f9; padding:28px 12px;">
+    <tr>
+        <td align="center">
 
-    <div style="padding: 24px; text-align: center; background-color: #17365d; color: #ffffff;">
-        <h1 style="margin: 0;">BankApp</h1>
-        <p style="margin: 8px 0 0;">Notification de mission</p>
-    </div>
+            <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0"
+                   style="width:100%; max-width:600px; background-color:#ffffff; border-radius:12px; overflow:hidden;">
 
-    <div style="padding: 32px;">
-        <h2>Bonjour <span th:text="${firstName}">Prénom</span>,</h2>
+                <!-- En-tête -->
+                <tr>
+                    <td align="center"
+                        style="background-color:#17365d; padding:30px 24px;">
+                        <h1 style="margin:0; color:#ffffff; font-size:28px; letter-spacing:1px;">
+                            BankApp
+                        </h1>
+                        <p style="margin:9px 0 0; color:#dce7f5; font-size:14px;">
+                            Notification de mission
+                        </p>
+                    </td>
+                </tr>
 
-        <p>Une nouvelle mission vient de vous être attribuée.</p>
+                <!-- Contenu -->
+                <tr>
+                    <td style="padding:32px 28px;">
 
-        <div style="padding: 20px; background-color: #f4f6f8; border-radius: 6px;">
-            <h3 style="margin-top: 0;" th:text="${missionTitle}">Titre de la mission</h3>
+                        <p style="margin:0 0 18px; font-size:16px; line-height:1.6;">
+                            Bonjour <strong th:text="${firstName}">Prénom</strong>,
+                        </p>
 
-            <p>
-                <strong>Description :</strong><br>
-                <span th:text="${missionDescription}">Description de la mission</span>
-            </p>
+                        <p style="margin:0 0 24px; color:#526174; font-size:15px; line-height:1.7;">
+                            Une nouvelle mission vient de vous être attribuée.
+                            Retrouvez ci-dessous les informations essentielles.
+                        </p>
 
-            <p>
-                <strong>Date de début :</strong>
-                <span th:text="${startDate}">Date de début</span>
-            </p>
+                        <!-- Carte mission -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                               style="background-color:#f7f9fc; border:1px solid #e1e8f0; border-radius:8px;">
+                            <tr>
+                                <td style="padding:24px;">
 
-            <p>
-                <strong>Date de fin :</strong>
-                <span th:text="${endDate}">Date de fin</span>
-            </p>
-        </div>
+                                    <p style="margin:0 0 8px; color:#61748a; font-size:12px; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">
+                                        Mission attribuée
+                                    </p>
 
-        <p>Connectez-vous à BankApp pour consulter les détails de cette mission.</p>
+                                    <h2 style="margin:0 0 22px; color:#17365d; font-size:22px; line-height:1.4;"
+                                        th:text="${missionTitle}">
+                                        Titre de la mission
+                                    </h2>
 
-        <p style="margin-top: 32px;">
-            Cordialement,<br>
-            <strong>L'équipe BankApp</strong>
-        </p>
-    </div>
+                                    <p style="margin:0 0 8px; color:#263445; font-size:14px; font-weight:bold;">
+                                        Description
+                                    </p>
 
-</div>
+                                    <p style="margin:0 0 24px; color:#526174; font-size:14px; line-height:1.7; white-space:pre-line;"
+                                       th:text="${missionDescription}">
+                                        Description de la mission
+                                    </p>
+
+                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                        <tr>
+                                            <td width="50%" valign="top" style="padding:14px 10px 0 0; border-top:1px solid #dfe6ee;">
+                                                <p style="margin:0 0 7px; color:#61748a; font-size:12px;">
+                                                    DATE DE DÉBUT
+                                                </p>
+                                                <p style="margin:0; color:#17365d; font-size:15px; font-weight:bold;"
+                                                   th:text="${startDate != null ? #temporals.format(startDate, 'dd/MM/yyyy') : 'Non précisée'}">
+                                                    11/10/2026
+                                                </p>
+                                            </td>
+
+                                            <td width="50%" valign="top" style="padding:14px 0 0 10px; border-top:1px solid #dfe6ee;">
+                                                <p style="margin:0 0 7px; color:#61748a; font-size:12px;">
+                                                    DATE DE FIN
+                                                </p>
+                                                <p style="margin:0; color:#17365d; font-size:15px; font-weight:bold;"
+                                                   th:text="${endDate != null ? #temporals.format(endDate, 'dd/MM/yyyy') : 'Non précisée'}">
+                                                    26/10/2026
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin:26px 0 0; color:#526174; font-size:14px; line-height:1.7;">
+                            Connectez-vous à BankApp pour consulter les détails de cette mission.
+                        </p>
+
+                        <p style="margin:28px 0 0; color:#526174; font-size:14px; line-height:1.8;">
+                            Cordialement,<br>
+                            <strong style="color:#17365d;">L'équipe BankApp</strong>
+                        </p>
+
+                    </td>
+                </tr>
+
+                <!-- Pied de page -->
+                <tr>
+                    <td align="center"
+                        style="padding:18px 24px; background-color:#f7f9fc; border-top:1px solid #e8edf3;">
+                        <p style="margin:0; color:#8491a2; font-size:12px; line-height:1.6;">
+                            Ce message a été envoyé automatiquement par BankApp.
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
 
 </body>
 </html>

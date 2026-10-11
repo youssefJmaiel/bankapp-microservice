@@ -46,3 +46,18 @@ eureka:
   client:
     service-url:
       defaultZone: http://discovery-server:8761/eureka/
+# IBM MQ - publication des événements d'affectation de mission
+ibm:
+  mq:
+    host: ${MQ_HOST:ibm-mq}
+    port: ${MQ_PORT:1414}
+    queue-manager: ${MQ_QUEUE_MANAGER:QM1}
+    channel: ${MQ_CHANNEL:DEV.APP.SVRCONN}
+    user: ${MQ_USER_IBM}
+    password: ${MQ_PASSWORD_IBM}
+    mission-assigned-queue: ${MQ_MISSION_ASSIGNED_QUEUE:MISSION.ASSIGNED}
+
+# Basculement contrôlé vers IBM MQ ; désactivé par défaut
+mission:
+  notifications:
+    mq-enabled: ${MISSION_NOTIFICATIONS_MQ_ENABLED:false}
