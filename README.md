@@ -1224,6 +1224,9 @@ docs/screenshots/
 
 ## 👥 Employees
 
+![Archived Employees](docs/screenshots/employees-archieved.jpeg)
+
+
 ![Employees](docs/screenshots/03-employees.png)
 
 ---
@@ -1277,6 +1280,9 @@ docs/screenshots/
 ---
 
 ## 🎯 Missions
+
+![Mission Details](docs/screenshots/misssion-details.jpeg)
+
 
 ![Missions](docs/screenshots/12-missions.png)
 
@@ -1899,6 +1905,9 @@ The Employees page provides separate active and archived views. Administrators c
 ---
 
 ## 📧 Mission Assignment Email Notifications
+
+![Mission Assignment Email Notification](docs/screenshots/notification-email.jpeg)
+
 
 BankApp supports automatic email notifications when a mission is assigned to an employee.
 
