@@ -1919,16 +1919,19 @@ The mission form supports the following information:
 ### Automatic notification workflow
 
 1. An authorized user creates a mission and assigns it to an employee.
-2. The Mission Service processes the mission and its assignment.
-3. After the database transaction commits successfully, the Mission Service invokes the Notification Service through Spring Cloud OpenFeign.
-4. The Notification Service renders the HTML email using Thymeleaf.
-5. The email is sent to the assigned employee through the configured SMTP provider.
+2. The Mission Service saves the mission and publishes a mission-assignment event.
+3. The event is sent asynchronously to the IBM MQ queue `MISSION.ASSIGNED`.
+4. The Notification Service consumes the event through `MissionAssignedListener`.
+5. Thymeleaf renders the HTML email using the mission and employee information.
+6. `JavaMailSender` sends the email to the assigned employee through the configured SMTP provider.
 
 **Services involved:**
 
-- `mission-service` — mission creation and assignment.
-- `bankapp-notification` — HTML email rendering and delivery.
-- `NotificationClient` — Feign client connecting the Mission Service to the notification endpoint.
+- `mission-service` — mission creation, assignment, and event publishing.
+- `MissionEventPublisher` — publishes mission-assignment events to IBM MQ.
+- `IBM MQ` — transports events asynchronously through `MISSION.ASSIGNED`.
+- `bankapp-notification` — consumes events and handles email rendering and delivery.
+- `MissionAssignedListener` — receives and processes mission-assignment events.
 
 ### Email template
 
@@ -1936,7 +1939,7 @@ The mission notification template is:
 
 `bankapp-notification/src/main/resources/templates/mission-assigned.html`
 
-It supports mission information such as the title, description, start date and end date, as well as the employee's first name.
+It supports mission information such as the title, description, start date and end date, as well as the employee's first name. Dates are formatted as `dd/MM/yyyy`.
 
 ### Database migration
 
@@ -1948,12 +1951,12 @@ It adds the `location`, `status`, `priority` and `budget` columns to the mission
 
 ### SMTP configuration and security
 
-The Notification Service uses Spring `JavaMailSender` and the SMTP configuration supplied through environment variables.
+The Notification Service uses Spring `JavaMailSender` and SMTP configuration supplied through environment variables.
 
-For Gmail, configure `smtp.gmail.com` on port `587` with authentication and STARTTLS enabled. Use a Gmail App Password stored in your local `.env` file.
+For Gmail, configure `smtp.gmail.com` on port `587` with authentication and STARTTLS enabled. Store the Gmail App Password in your local `.env` file.
 
 **Security:** Never commit `.env` files, SMTP credentials, app passwords or other secrets to GitHub.
 
 ### Validation
 
-The mission notification workflow was tested successfully: an email was received by the assigned employee after a mission was created.
+The mission notification workflow was tested successfully: a mission-assignment event was published to IBM MQ, consumed by the Notification Service, and an email was received by the assigned employee.
