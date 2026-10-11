@@ -1894,3 +1894,66 @@ The Employees page provides separate active and archived views. Administrators c
 - Frontend production build completed successfully with Vite.
 - Backend Maven compilation and packaging completed successfully.
 - Archive, archived-list retrieval, and restore API operations were tested successfully.
+
+
+---
+
+## 📧 Mission Assignment Email Notifications
+
+BankApp supports automatic email notifications when a mission is assigned to an employee.
+
+### Mission form fields
+
+The mission form supports the following information:
+
+- **Title** — mission title.
+- **Description** — details about the mission.
+- **Assigned Employee** — employee assigned to the mission.
+- **Location** — mission location.
+- **Start Date** — scheduled start date.
+- **End Date** — scheduled end date.
+- **Status** — mission status (`PENDING` by default).
+- **Priority** — mission priority (`MEDIUM` by default).
+- **Budget** — mission budget.
+
+### Automatic notification workflow
+
+1. An authorized user creates a mission and assigns it to an employee.
+2. The Mission Service processes the mission and its assignment.
+3. After the database transaction commits successfully, the Mission Service invokes the Notification Service through Spring Cloud OpenFeign.
+4. The Notification Service renders the HTML email using Thymeleaf.
+5. The email is sent to the assigned employee through the configured SMTP provider.
+
+**Services involved:**
+
+- `mission-service` — mission creation and assignment.
+- `bankapp-notification` — HTML email rendering and delivery.
+- `NotificationClient` — Feign client connecting the Mission Service to the notification endpoint.
+
+### Email template
+
+The mission notification template is:
+
+`bankapp-notification/src/main/resources/templates/mission-assigned.html`
+
+It supports mission information such as the title, description, start date and end date, as well as the employee's first name.
+
+### Database migration
+
+The mission details are persisted through Liquibase. The migration is:
+
+`mission-service/src/main/resources/db/changelog/changes/002-add-mission-details.yaml`
+
+It adds the `location`, `status`, `priority` and `budget` columns to the mission database schema.
+
+### SMTP configuration and security
+
+The Notification Service uses Spring `JavaMailSender` and the SMTP configuration supplied through environment variables.
+
+For Gmail, configure `smtp.gmail.com` on port `587` with authentication and STARTTLS enabled. Use a Gmail App Password stored in your local `.env` file.
+
+**Security:** Never commit `.env` files, SMTP credentials, app passwords or other secrets to GitHub.
+
+### Validation
+
+The mission notification workflow was tested successfully: an email was received by the assigned employee after a mission was created.
