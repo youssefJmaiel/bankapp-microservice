@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-add-payment-account-details
+      author: bankapp
+      changes:
+        - addColumn:
+            schemaName: payment_schema
+            tableName: payments
+            columns:
+              - column:
+                  name: source_account_id
+                  type: BIGINT
+              - column:
+                  name: destination_account_id
+                  type: BIGINT
+              - column:
+                  name: owner_id
+                  type: VARCHAR(100)

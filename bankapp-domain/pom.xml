@@ -25,6 +25,8 @@
         <module>partner-domain</module>
         <module>message-domain</module>
         <module>notification-domain</module>
+        <module>payment-domain</module>
+        <module>account-domain</module>
     </modules>
 
     <build>

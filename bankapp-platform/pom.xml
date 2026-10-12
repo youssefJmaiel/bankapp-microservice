@@ -39,6 +39,8 @@
 		<module>../message-router</module>
 		<module>../partner-service</module>
 		<module>../bankapp-notification</module>
+		<module>../payment-service</module>
+<module>../account-service</module>
 		<module>../common</module>
 	</modules>
 

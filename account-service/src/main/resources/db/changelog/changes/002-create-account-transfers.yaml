@@ -1,0 +1,64 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-account-transfers
+      author: bankapp
+      changes:
+        - createTable:
+            tableName: account_transfers
+            schemaName: account_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_account_transfers
+                    nullable: false
+              - column:
+                  name: reference
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_account_transfers_reference
+              - column:
+                  name: source_account_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_transfer_source_account
+                    references: account_schema.accounts(id)
+              - column:
+                  name: destination_account_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_transfer_destination_account
+                    references: account_schema.accounts(id)
+              - column:
+                  name: amount
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              ALTER TABLE account_schema.account_transfers
+              ADD CONSTRAINT chk_account_transfers_amount_positive
+              CHECK (amount > 0)
+        - sql:
+            sql: >
+              ALTER TABLE account_schema.account_transfers
+              ADD CONSTRAINT chk_account_transfers_distinct_accounts
+              CHECK (source_account_id <> destination_account_id)
