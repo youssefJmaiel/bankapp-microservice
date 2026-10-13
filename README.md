@@ -2029,7 +2029,7 @@ This addition extends BankApp with a dedicated payment workflow while preserving
 
 # 📊 Payment Transaction History — Frontend
 
-![BankApp Payment Transaction History](docs/screenshots/payment-history.jpeg)
+![BankApp Payment Transaction History](docs/screenshots/payment-history-statistic.jpeg)
 
 ## Overview
 
