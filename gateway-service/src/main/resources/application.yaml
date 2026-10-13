@@ -46,6 +46,11 @@ spring:
           predicates:
             - Path=/api/payments/**
 
+        - id: leave-service
+          uri: lb://LEAVE-SERVICE
+          predicates:
+            - Path=/api/leaves/**
+
 
 eureka:
   client:

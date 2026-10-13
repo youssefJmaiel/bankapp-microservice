@@ -27,6 +27,7 @@
         <module>notification-domain</module>
         <module>payment-domain</module>
         <module>account-domain</module>
+        <module>leave-domain</module>
     </modules>
 
     <build>
