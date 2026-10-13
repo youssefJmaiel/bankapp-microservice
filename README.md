@@ -2024,3 +2024,59 @@ The Payment Service and Account Service have separate responsibilities: the Paym
 - **Frontend integration:** React and TypeScript
 
 This addition extends BankApp with a dedicated payment workflow while preserving the separation of responsibilities between microservices.
+
+---
+
+# 📊 Payment Transaction History — Frontend
+
+![BankApp Payment Transaction History](docs/screenshots/payment-history.jpeg)
+
+## Overview
+
+The BankApp frontend provides a dedicated Transaction History section that allows authenticated users to review their recorded payments. This feature complements the Payment Microservice by presenting payment records in a clear, structured interface.
+
+## Transaction History Features
+
+### 1. Transaction Overview
+
+The transaction history organizes payment information into a table. Depending on the data returned by the API, displayed information can include the transaction reference, source account, destination account, amount, currency, payment status, and transaction date.
+
+### 2. Authenticated Payment History
+
+The frontend retrieves the authenticated user's payment history through the following REST endpoint:
+
+`GET /api/payments/my`
+
+The request is routed through the API Gateway to the Payment Microservice. Authentication relies on the existing Keycloak and JWT security configuration. The backend is responsible for associating payment records with their owners and enforcing access controls.
+
+### 3. Payment Status
+
+Payment status labels help users identify the recorded outcome of a transaction. The displayed status reflects the information returned by the backend.
+
+### 4. Refreshing Payment History
+
+The transaction history can be refreshed to retrieve the latest available payment records. After a payment submission, the frontend can reload the history to display updated information when supported by its implementation.
+
+### 5. Loading, Empty, and Error States
+
+The interface should account for loading, empty, error, and populated states, helping users understand whether records are being retrieved, no transactions are available, or a request has failed.
+
+## Frontend and Backend Integration
+
+The feature connects the React and TypeScript frontend to the existing BankApp microservices architecture.
+
+The Payment Microservice manages payment records and their statuses, while the Account Service remains responsible for account balances and transfer execution. This separation of responsibilities supports a modular and maintainable architecture.
+
+## Technologies
+
+- **React and TypeScript** — frontend development.
+- **Tailwind CSS** — interface styling.
+- **REST API** — communication with backend services.
+- **Spring Cloud Gateway** — API routing.
+- **Spring Boot** — payment service implementation.
+- **Keycloak and JWT** — authentication and secure API access.
+- **PostgreSQL and Liquibase** — data persistence and database migrations.
+
+## Summary
+
+The Payment Transaction History feature provides authenticated users with a dedicated interface for reviewing recorded transfers. It integrates the frontend with the Payment Microservice through a secured REST API while preserving the separation between payment record management and account transfer execution.
