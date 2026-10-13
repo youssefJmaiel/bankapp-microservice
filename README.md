@@ -1969,3 +1969,58 @@ For Gmail, configure `smtp.gmail.com` on port `587` with authentication and STAR
 ### Validation
 
 The mission notification workflow was tested successfully: a mission-assignment event was published to IBM MQ, consumed by the Notification Service, and an email was received by the assigned employee.
+
+
+---
+
+# 💳 Payment Microservice — Account Transfers
+
+![BankApp Payment Microservice](docs/screenshots/Bankapp-payment.jpeg)
+
+## Overview
+
+BankApp now includes a dedicated **Payment Microservice**, built with Java 17 and Spring Boot, to handle payment requests and coordinate transfers between bank accounts.
+
+The service is integrated into the existing microservices architecture through Spring Cloud Gateway and Eureka Service Discovery. It runs on port `8088` and exposes its REST API through the `/api/payments/**` Gateway route.
+
+## Key Features
+
+- **Payment creation:** Accepts payment requests containing the source account, destination account, amount, and currency.
+- **Request validation:** Validates payment data, including positive amounts, decimal precision, and currency format.
+- **Unique payment references:** Generates a unique reference for each payment when needed.
+- **Payment tracking:** Stores payment records and tracks their status throughout processing.
+- **Account Service integration:** Delegates the actual account transfer to the Account Service instead of directly modifying account balances.
+- **Secure REST API:** Uses Keycloak-issued JWT access tokens to authenticate requests and associate payments with their owners.
+- **Payment history:** Allows authenticated users to retrieve their own payments.
+- **Database migrations:** Uses PostgreSQL and Liquibase to manage the payment database schema.
+
+## How It Works
+
+1. The user submits a payment request from the React frontend.
+2. The request is sent through the Spring Cloud Gateway to the Payment Microservice.
+3. The service validates the request, generates a payment reference, and records the payment with an initial `PENDING` status.
+4. The Payment Microservice calls the Account Service to request the actual account transfer, forwarding the authentication token.
+5. The Account Service validates the accounts and transfer conditions before executing the balance movement.
+6. When the transfer succeeds, the payment status becomes `COMPLETED`. If the downstream request fails, the payment is marked `FAILED` and the API reports an error.
+
+The Payment Service and Account Service have separate responsibilities: the Payment Service manages payment requests and their status, while the Account Service owns account balances and transfer execution. Since these operations span two independent services, a network failure can leave the final transfer outcome uncertain and does not guarantee an automatic rollback across both services.
+
+## REST API Endpoints
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `POST` | `/api/payments` | Creates a payment and requests the corresponding account transfer. |
+| `GET` | `/api/payments/my` | Retrieves the authenticated user's payment history. |
+| `GET` | `/api/payments/{id}` | Retrieves a payment belonging to the authenticated user. |
+
+## Technology Stack
+
+- **Language:** Java 17
+- **Framework:** Spring Boot
+- **Security:** Spring Security, OAuth2 Resource Server, JWT, and Keycloak
+- **Architecture:** Microservices, Spring Cloud Gateway, and Eureka
+- **Database:** PostgreSQL with a dedicated `payment_schema`
+- **Database migrations:** Liquibase
+- **Frontend integration:** React and TypeScript
+
+This addition extends BankApp with a dedicated payment workflow while preserving the separation of responsibilities between microservices.
