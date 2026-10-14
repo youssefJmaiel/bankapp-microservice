@@ -2080,3 +2080,116 @@ The Payment Microservice manages payment records and their statuses, while the A
 ## Summary
 
 The Payment Transaction History feature provides authenticated users with a dedicated interface for reviewing recorded transfers. It integrates the frontend with the Payment Microservice through a secured REST API while preserving the separation between payment record management and account transfer execution.
+
+
+---
+
+# Leave Management Microservice
+
+## Overview
+
+The **Leave Management Microservice** is a new feature of the BankApp Microservices project. It provides a dedicated workflow for employees to submit and track leave requests and for administrators to review, approve, or reject them.
+
+This service separates leave management from the other business domains in BankApp. It is implemented with Spring Boot and integrated with Spring Cloud Gateway, Eureka service discovery, Keycloak/JWT authentication, PostgreSQL, and Liquibase database migrations.
+
+## 1. User Interface — Employee Leave Requests
+
+![Leave Management - User Interface](docs/screenshots/leave-interface-user.jpeg)
+
+The User interface allows authenticated employees to manage their own leave requests.
+
+### Main capabilities
+
+- **Submit leave requests:** Employees can create a leave request through the frontend form.
+- **View personal requests:** Employees can retrieve and review their own requests.
+- **Track request status:** Employees can follow the status returned by the service, such as pending, approved, or rejected.
+- **Request cancellation:** Employees can request cancellation of their own leave requests, subject to backend business rules.
+- **Personalized access:** The backend identifies the current user from the authenticated JWT token.
+
+This interface gives employees a dedicated place to submit requests and follow their progress without requiring access to administrative functions.
+
+
+## 2. Admin Interface — Leave Request Management
+
+![Leave Management - Admin Interface](docs/screenshots/leave-interface-admin.jpeg)
+
+The Admin interface provides a centralized area for managing employee leave requests.
+
+### Main capabilities
+
+- **View all requests:** Administrators can retrieve the leave requests available for review.
+- **Review employee requests:** Administrators can inspect the information returned by the service before making a decision.
+- **Approve requests:** Administrators can approve a leave request through the administrative decision endpoint.
+- **Reject requests:** Administrators can reject a request using the same endpoint with a different decision value.
+- **Protected administration:** The backend restricts the endpoint for listing all requests and the decision endpoint to users with the `ADMIN` role.
+
+Administrative permissions are enforced by the backend, not only by the visibility of frontend controls.
+
+## 3. Leave Request Workflow
+
+1. An authenticated employee submits a leave request through the frontend.
+2. The frontend sends the request through the BankApp API Gateway.
+3. The Gateway routes the request to the Leave Management Microservice.
+4. The service processes the request and associates it with the authenticated user.
+5. The employee retrieves their personal requests to follow their progress.
+6. An administrator retrieves and reviews the requests.
+7. The administrator approves or rejects a request.
+8. The updated request can be retrieved by the relevant interface.
+
+The backend remains responsible for authorization, request processing, and persistence.
+
+
+## 4. REST API Endpoints
+
+The Leave Management Microservice exposes the following REST endpoints through the BankApp API Gateway.
+
+| Method | Endpoint | Role | Description |
+|---|---|---|---|
+| POST | `/api/leaves` | USER or ADMIN | Create a leave request. |
+| GET | `/api/leaves/my` | USER or ADMIN | Retrieve the authenticated user's requests. |
+| DELETE | `/api/leaves/{id}` | USER or ADMIN | Request cancellation of the user's own request. |
+| GET | `/api/leaves/all` | ADMIN | Retrieve all leave requests. |
+| PATCH | `/api/leaves/{id}/decision` | ADMIN | Approve or reject a leave request. |
+
+
+### Example: Approve a leave request
+
+An administrator can approve a leave request by sending a PATCH request to `/api/leaves/{id}/decision` with a valid access token and the ADMIN role.
+
+Example JSON request body:
+
+    {"decision": "APPROVED"}
+
+To reject a request, use `REJECTED` as the decision value. The backend checks the administrator permissions before processing the decision.
+
+
+## 5. Microservice Architecture and Integration
+
+The Leave Management Microservice integrates with the existing BankApp infrastructure.
+
+    React + TypeScript Frontend
+               |
+               v
+    Spring Cloud Gateway (Port 8082)
+               |
+               v
+         Eureka Discovery
+               |
+               v
+    Leave Service (Port 8090)
+               |
+               v
+    PostgreSQL - leave_schema
+
+### Components
+
+- **React and TypeScript:** Provide the User and Admin interfaces.
+- **Spring Boot:** Implements leave request management and administrative decisions.
+- **Spring Cloud Gateway:** Routes `/api/leaves/**` requests to the Leave Service.
+- **Eureka:** Supports discovery of `LEAVE-SERVICE`.
+- **Keycloak and JWT:** Provide authentication and role-based access control.
+- **PostgreSQL:** Stores leave data in the dedicated `leave_schema` schema.
+- **Liquibase:** Manages database schema migrations.
+- **Docker Compose:** Supports the local multi-service environment.
+
+The dedicated Leave Service keeps leave-related business logic separate from other BankApp services and integrates through the existing API Gateway and service discovery infrastructure.
