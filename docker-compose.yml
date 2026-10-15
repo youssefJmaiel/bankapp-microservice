@@ -285,6 +285,40 @@ services:
     networks:
       - bankapp
 
+  # =====================================================
+  # AI SERVICE
+  # =====================================================
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: bankapp-ai
+    ports:
+      - "8091:8091"
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      KEYCLOAK_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen2.5:3b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+      - ollama
+    networks:
+      - bankapp
+
+  # =====================================================
+  # OLLAMA - LOCAL AI MODEL
+  # =====================================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: bankapp-ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - bankapp
+
   gateway-service:
     build:
       context: ./gateway-service
@@ -342,6 +376,9 @@ services:
 # =====================================================
 # NETWORK
 # =====================================================
+volumes:
+  ollama_data:
+
 networks:
   bankapp:
     driver: bridge

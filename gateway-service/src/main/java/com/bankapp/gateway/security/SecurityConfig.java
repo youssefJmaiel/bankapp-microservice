@@ -68,7 +68,8 @@ public class SecurityConfig {
                 "Authorization",
                 "Content-Type",
                 "Accept",
-                "Origin"
+                "Origin",
+                "X-Response-Language"
         ));
 
         configuration.setExposedHeaders(List.of(

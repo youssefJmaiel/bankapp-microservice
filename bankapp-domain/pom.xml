@@ -28,6 +28,7 @@
         <module>payment-domain</module>
         <module>account-domain</module>
         <module>leave-domain</module>
+        <module>ai-domain</module>
     </modules>
 
     <build>

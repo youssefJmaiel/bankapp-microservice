@@ -46,6 +46,11 @@ spring:
           predicates:
             - Path=/api/payments/**
 
+        - id: ai-service
+          uri: lb://AI-SERVICE
+          predicates:
+            - Path=/api/ai/**
+
         - id: leave-service
           uri: lb://LEAVE-SERVICE
           predicates:
