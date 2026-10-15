@@ -18,6 +18,13 @@ eureka:
   instance:
     prefer-ip-address: true
 
+account:
+  service:
+    base-url: ${ACCOUNT_SERVICE_BASE_URL:http://localhost:8089}
+payment:
+  service:
+    base-url: ${PAYMENT_SERVICE_BASE_URL:http://localhost:8088}
+
 ai:
   ollama:
     base-url: ${OLLAMA_BASE_URL:http://localhost:11434}

@@ -4,6 +4,8 @@ import com.bankapp.ai.domain.ChatRequest;
 import com.bankapp.ai.domain.ChatResponse;
 import com.bankapp.ai.service.ChatService;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +31,8 @@ public class AiChatController {
     )
     public ChatResponse chat(
             @Valid @RequestBody ChatRequest request,
-            @RequestHeader(value = "X-Response-Language", required = false) String language) {
-        return chatService.chat(request.getMessage(), language);
+            @RequestHeader(value = "X-Response-Language", required = false) String language,
+            @AuthenticationPrincipal Jwt jwt) {
+        return chatService.chat(request.getMessage(), language, jwt.getTokenValue());
     }
 }

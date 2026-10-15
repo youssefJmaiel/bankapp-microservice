@@ -26,7 +26,18 @@ public class AccountTransferService {
         this.transferRepository = transferRepository;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
+    public java.util.List<AccountTransfer> findTransfersForAccounts(
+            java.util.List<Long> accountIds) {
+        if (accountIds == null || accountIds.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+
+        return transferRepository
+                .findBySourceAccountIdInOrDestinationAccountIdInOrderByCreatedAtDesc(
+                        accountIds, accountIds);
+    }
+
     public AccountTransfer transfer(
             AccountTransferRequest request,
             String userId,

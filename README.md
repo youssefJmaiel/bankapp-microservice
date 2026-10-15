@@ -2258,3 +2258,58 @@ integration path with the rest of BankApp.
 
 The model name and Ollama endpoint are configurable, allowing the local
 inference setup to be adjusted without changing the frontend API contract.
+
+## Personalized Financial Insights
+
+The AI Assistant can analyze the authenticated user's banking data and produce
+a financial activity summary based on the information available from the
+Account Service and Payment Service.
+
+### Financial Analysis Capabilities
+
+- **Account overview:** Reports the number of accounts, active accounts, and
+  combined balances grouped by currency.
+- **Transfer analysis:** Separates incoming transfers, outgoing transfers, and
+  internal transfers between accounts owned by the authenticated user.
+- **Payment analysis:** Summarizes payment records by status and reports
+  payment counts and amounts grouped by status and currency for the reporting
+  month.
+- **Natural-language explanations:** Uses the configured language model to
+  explain the retrieved figures and highlight important limitations.
+- **Authenticated data access:** Propagates the user's JWT when retrieving
+  banking data, allowing the backend services to enforce access controls.
+
+### Reporting Period and Currency Handling
+
+Transfer activity and payment activity are filtered by the reporting month.
+Amounts are grouped by currency to avoid combining values expressed in
+different currencies. Currency codes are preserved in the generated summary.
+
+The reporting period is determined by the AI Service's current date. Historical
+month selection is not implied unless explicitly supported by the request
+handling implementation.
+
+### Preventing Double Counting
+
+Payment records and account transfers are reported separately. A completed
+payment may already have a corresponding account transfer, so their amounts
+must not automatically be added together to calculate total spending.
+
+Internal transfers between accounts owned by the same user are also reported
+separately from external incoming and outgoing transfers. Moving money between
+one's own accounts should not automatically be interpreted as income or
+spending.
+
+### Interpretation and Limitations
+
+The report reflects the records returned by the connected banking services.
+Missing records or incomplete transaction details can limit the conclusions
+that can be drawn.
+
+Account balances and transaction summaries alone do not necessarily establish
+a user's actual expenses, savings rate, or net cash flow. These metrics require
+appropriate transaction classification and sufficiently complete financial
+data.
+
+The language model explains the retrieved figures; it should not be treated
+as the source of truth for balances or transaction amounts.

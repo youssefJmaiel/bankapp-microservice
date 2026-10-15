@@ -300,6 +300,8 @@ services:
       KEYCLOAK_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
       OLLAMA_BASE_URL: http://ollama:11434
       OLLAMA_MODEL: qwen2.5:3b
+      ACCOUNT_SERVICE_BASE_URL: http://account-service:8089
+      PAYMENT_SERVICE_BASE_URL: http://payment-service:8088
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

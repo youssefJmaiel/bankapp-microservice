@@ -77,6 +77,24 @@ public class AccountController {
         return ResponseEntity.ok(accounts);
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @GetMapping("/my/transfers")
+    public ResponseEntity<List<AccountTransfer>> getMyTransfers(
+            @AuthenticationPrincipal Jwt jwt) {
+
+        List<AccountDto> accounts = getMyAccounts(jwt).getBody();
+        if (accounts == null || accounts.isEmpty()) {
+            return ResponseEntity.ok(java.util.Collections.emptyList());
+        }
+
+        List<Long> accountIds = accounts.stream()
+                .map(AccountDto::getId)
+                .collect(java.util.stream.Collectors.toList());
+
+        return ResponseEntity.ok(
+                accountTransferService.findTransfersForAccounts(accountIds));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<AccountDto> getAccountById(@PathVariable Long id) {
         return ResponseEntity.ok(accountService.getAccountById(id));
