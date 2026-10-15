@@ -2193,3 +2193,68 @@ The Leave Management Microservice integrates with the existing BankApp infrastru
 - **Docker Compose:** Supports the local multi-service environment.
 
 The dedicated Leave Service keeps leave-related business logic separate from other BankApp services and integrates through the existing API Gateway and service discovery infrastructure.
+
+# 🤖 AI Assistant Microservice
+
+![BankApp AI Assistant](docs/screenshots/ia-service-chatbot.jpeg)
+
+## Overview
+
+BankApp extends its microservices platform with an AI-powered conversational
+assistant. The feature introduces a dedicated Spring Boot AI Service that
+connects the application's frontend to a locally hosted large language model
+through a REST API.
+
+The assistant provides a conversational interface designed for natural-language
+interactions, with a frontend that supports English, French, and Arabic.
+
+## Architecture and Integration
+
+The AI capability is integrated into the existing BankApp infrastructure:
+
+- **React and TypeScript:** Provide the dedicated AI Assistant chat interface.
+- **Spring Boot AI Service:** Handles chat requests and communicates with the
+  configured language model.
+- **Spring Cloud Gateway:** Routes requests sent to `POST /api/ai/chat` to the
+  AI Service using the `AI-SERVICE` service identifier.
+- **Netflix Eureka:** Supports service discovery within the microservices
+  architecture.
+- **Ollama:** Provides the local runtime used to run the language model.
+- **Qwen2.5 3B:** The default model configured for AI response generation.
+
+## Local Language Model with Ollama
+
+The AI Service communicates with Ollama's chat API at `/api/chat`. Its
+configuration can be customized using environment variables:
+
+| Variable | Default value | Purpose |
+|---|---|---|
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama API base URL |
+| `OLLAMA_MODEL` | `qwen2.5:3b` | Language model used to generate responses |
+
+In the Docker Compose environment, the AI Service is configured to reach Ollama
+through the `ollama` service hostname. The model must be available in the Ollama
+runtime before it can generate responses.
+
+Running the model locally provides an alternative to relying on a third-party
+hosted language-model API for inference. Actual performance depends on the
+available hardware and model configuration.
+
+## Request Flow
+
+1. An authenticated user opens the AI Assistant page in the frontend.
+2. The frontend submits a chat message to `POST /api/ai/chat`.
+3. Spring Cloud Gateway routes the request to the registered AI Service.
+4. The AI Service sends the conversation prompt to Ollama.
+5. Ollama runs the configured Qwen2.5 3B model and returns a generated response.
+6. The AI Service returns the response to the frontend for display.
+
+## Engineering Considerations
+
+The AI Service is maintained as a separate component, keeping language-model
+integration independent from the platform's core banking business services.
+The Gateway and service-discovery infrastructure provide a consistent
+integration path with the rest of BankApp.
+
+The model name and Ollama endpoint are configurable, allowing the local
+inference setup to be adjusted without changing the frontend API contract.
