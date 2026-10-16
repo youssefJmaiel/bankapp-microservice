@@ -2330,17 +2330,6 @@ and persistent conversation history within the microservices architecture.
   <tr>
     <td width="50%" align="center">
       <img
-        src="docs/screenshots/ia_chat-history1.jpeg"
-        alt="BankApp AI Assistant showing a banking conversation and conversation history"
-        width="100%"
-      />
-      <br />
-      <strong>Screenshot 1 — AI Chat Interface</strong>
-      <br />
-      <sub>Interact with the banking assistant using natural-language questions.</sub>
-    </td>
-    <td width="50%" align="center">
-      <img
         src="docs/screenshots/ia_chat-history2.jpeg"
         alt="BankApp AI Assistant demonstrating persistent conversations and chat history"
         width="100%"
@@ -2349,6 +2338,17 @@ and persistent conversation history within the microservices architecture.
       <strong>Screenshot 2 — Persistent Conversation History</strong>
       <br />
       <sub>Access previous conversations and continue an existing discussion.</sub>
+    </td>
+    <td width="50%" align="center">
+      <img
+        src="docs/screenshots/ia_chat-history1.jpeg"
+        alt="BankApp AI Assistant showing a banking conversation and conversation history"
+        width="100%"
+      />
+      <br />
+      <strong>Screenshot 1 — AI Chat Interface</strong>
+      <br />
+      <sub>Interact with the banking assistant using natural-language questions.</sub>
     </td>
   </tr>
 </table>
