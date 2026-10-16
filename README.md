@@ -2335,7 +2335,7 @@ and persistent conversation history within the microservices architecture.
         width="100%"
       />
       <br />
-      <strong>Screenshot 2 — Persistent Conversation History</strong>
+      <strong>Screenshot 1 — Persistent Conversation History</strong>
       <br />
       <sub>Access previous conversations and continue an existing discussion.</sub>
     </td>
@@ -2346,7 +2346,7 @@ and persistent conversation history within the microservices architecture.
         width="100%"
       />
       <br />
-      <strong>Screenshot 1 — AI Chat Interface</strong>
+      <strong>Screenshot 2 — AI Chat Interface</strong>
       <br />
       <sub>Interact with the banking assistant using natural-language questions.</sub>
     </td>
