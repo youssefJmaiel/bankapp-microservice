@@ -2313,3 +2313,104 @@ data.
 
 The language model explains the retrieved figures; it should not be treated
 as the source of truth for balances or transaction amounts.
+
+
+---
+
+<!-- BANKAPP_AI_CHAT_GALLERY -->
+
+## AI Banking Assistant — Conversation History and Financial Insights
+
+BankApp integrates an AI-powered conversational assistant that helps authenticated
+users explore their available banking information through natural-language
+questions. The interface combines conversational AI, financial data retrieval,
+and persistent conversation history within the microservices architecture.
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img
+        src="docs/screenshots/ia_chat-history1.jpeg"
+        alt="BankApp AI Assistant showing a banking conversation and conversation history"
+        width="100%"
+      />
+      <br />
+      <strong>Screenshot 1 — AI Chat Interface</strong>
+      <br />
+      <sub>Interact with the banking assistant using natural-language questions.</sub>
+    </td>
+    <td width="50%" align="center">
+      <img
+        src="docs/screenshots/ia_chat-history2.jpeg"
+        alt="BankApp AI Assistant demonstrating persistent conversations and chat history"
+        width="100%"
+      />
+      <br />
+      <strong>Screenshot 2 — Persistent Conversation History</strong>
+      <br />
+      <sub>Access previous conversations and continue an existing discussion.</sub>
+    </td>
+  </tr>
+</table>
+
+### What Can the BankApp AI Assistant Do?
+
+- **Answer banking questions:** Explain available account and payment information
+  using natural-language responses grounded in data retrieved from the banking
+  services.
+- **Summarize account information:** Report account counts, active accounts,
+  and combined balances grouped by currency.
+- **Analyze transfer activity:** Distinguish incoming transfers, outgoing
+  transfers, and internal transfers between accounts belonging to the same user.
+- **Explain payment activity:** Summarize payment records by status, transaction
+  count, amount, and currency for the supported reporting period.
+- **Provide financial insights:** Explain retrieved figures, highlight activity
+  patterns, and present monthly comparisons when supported by the request and
+  available data.
+- **Maintain conversational continuity:** Save conversations and messages so
+  users can return to their previous discussions instead of starting from
+  scratch after every page reload.
+
+The assistant is designed to help users understand their available banking data.
+It does not replace the banking services as the authoritative source of account
+balances, transaction records, or payment statuses. Its analytical conclusions
+are limited by the completeness and classification of the retrieved data.
+
+### Backend Architecture and Conversation Lifecycle
+
+The AI Assistant is implemented as a dedicated Spring Boot microservice and
+integrated into the BankApp platform through Spring Cloud Gateway and Eureka
+service discovery.
+
+1. **React frontend:** The AI chat interface sends user messages to the backend
+   and displays generated responses and saved conversations.
+2. **REST API and API Gateway:** Chat requests are submitted to
+   `POST /api/ai/chat` and routed to the AI Service through Spring Cloud Gateway.
+3. **Spring Boot AI Service:** Processes chat requests, coordinates financial
+   data retrieval, and manages conversation persistence.
+4. **Financial data integration:** The assistant retrieves relevant information
+   from the Account Service and Payment Service, forwarding the authenticated
+   user's JWT so downstream services can enforce their access controls.
+5. **Language model inference:** Ollama runs the configured Qwen2.5 3B model
+   locally to generate natural-language responses from the available context.
+6. **Persistent storage:** Conversation records and their messages are stored
+   in the database using JPA repositories, with Liquibase migrations managing
+   the required database schema.
+7. **Conversation restoration:** The frontend can retrieve previously saved
+   conversations and their messages, allowing users to resume discussions after
+   navigating away or reloading the page.
+
+### Persistence, Security, and Data Integrity
+
+Conversation history is persisted by the backend rather than being kept only
+in the browser's temporary state. This separates the lifecycle of a conversation
+from the lifecycle of the frontend page.
+
+Authentication and authorization remain essential: conversation retrieval
+must be restricted to the authenticated owner, and financial data access must
+respect the permissions enforced by the banking services. Financial summaries
+also preserve currency distinctions and treat payment records and account
+transfers separately to reduce the risk of double counting.
+
+**Technologies:** React, TypeScript, Spring Boot, Spring Cloud Gateway,
+Netflix Eureka, Spring Data JPA, Liquibase, PostgreSQL, Ollama, and Qwen2.5 3B.
