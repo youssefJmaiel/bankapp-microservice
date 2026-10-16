@@ -164,9 +164,48 @@ public class ChatService {
                 || text.contains("my transactions")
                 || text.contains("payment amounts")
                 || text.contains("payment history")
+                || text.contains("failed payments")
+                || text.contains("failed payment")
+                || text.contains("payment failed")
+                || text.contains("most recent failed")
+                || text.contains("historique des paiements")
+                || text.contains("paiements échoués")
+                || text.contains("paiements echoues")
+                || text.contains("paiement échoué")
+                || text.contains("paiement echoue")
+                || text.contains("paiements en échec")
+                || text.contains("paiements en echec")
+                || text.contains("motif d'échec")
+                || text.contains("failure reason")
+                || text.contains("failed payment reason")
+                || text.contains("compare my payments")
+                || text.contains("compare my transfers")
+                || text.contains("compare my payments and transfers")
+                || text.contains("internal transfer activity")
+                || text.contains("which of my accounts")
+                || text.contains("transfer activity by account")
+                || text.contains("payment summary")
+                || text.contains("summary of my payments")
+                || text.contains("my payments")
                 || text.contains("payments by status")
+                || text.contains("analyze my payments")
+                || text.contains("analyse my payments")
                 || text.contains("transfer history")
-                || text.contains("incoming and outgoing transfers")
+                || text.contains("transfer summary")
+                || text.contains("summary of my transfers")
+                || text.contains("analyze my transfers")
+                || text.contains("analyse my transfers")
+                || text.contains("my transfers")
+                || text.contains("incoming transfers")
+                || text.contains("outgoing transfers")
+                || text.contains("transfers between my own accounts")
+                || text.contains("cash flow")
+                || text.contains("résumé des paiements")
+                || text.contains("resume des paiements")
+                || text.contains("résumé des virements")
+                || text.contains("resume des virements")
+                || text.contains("analyse mes virements")
+                || text.contains("analyse mes paiements")
                 || text.contains("mes dépenses")
                 || text.contains("mes depenses")
                 || text.contains("mes virements")
@@ -221,7 +260,34 @@ public class ChatService {
             List<Map<String, Object>> payments = getServiceList(
                     paymentServiceBaseUrl + "/api/payments/my", requestEntity);
 
-            String month = LocalDate.now().toString().substring(0, 7);
+            String requestedMonth = extractRequestedMonth(message);
+            String month = requestedMonth != null
+                    ? requestedMonth
+                    : LocalDate.now().toString().substring(0, 7);
+
+            if (isPaymentHistoryQuestion(message)) {
+                return answerPaymentHistory(payments, month, requestedMonth != null,
+                        false, language, message);
+            }
+
+            if (isFailedPaymentQuestion(message)) {
+                return answerPaymentHistory(payments, month, requestedMonth != null,
+                        true, language, message);
+            }
+
+            List<String> requestedMonths = extractRequestedMonths(message);
+            if (isMonthlyComparisonQuestion(message) && requestedMonths.size() >= 2) {
+                return answerMonthlyComparison(
+                        payments, transfers, ownAccountIds,
+                        requestedMonths.get(0), requestedMonths.get(1),
+                        language, message);
+            }
+
+            if (isInternalTransferActivityQuestion(message)) {
+                return answerInternalTransferActivity(
+                        transfers, accounts, ownAccountIds, month,
+                        requestedMonth != null, language, message);
+            }
             Map<String, BigDecimal> outgoingExternal = new TreeMap<>();
             Map<String, BigDecimal> incomingExternal = new TreeMap<>();
             Map<String, BigDecimal> internalTransfers = new TreeMap<>();
@@ -315,6 +381,10 @@ public class ChatService {
                     .append("Payment amounts are NOT added to transfer totals because ")
                     .append("a completed payment may already have a corresponding account transfer.");
 
+            if (isFocusedPaymentOrTransferQuestion(message)) {
+                return new ChatResponse(facts.toString());
+            }
+
             String explanation = generateFinancialExplanation(
                     message, language, facts.toString());
             return new ChatResponse(facts + "\n\n" + explanation);
@@ -326,6 +396,486 @@ public class ChatService {
                     "Financial insights are temporarily unavailable because a banking service did not respond. Please try again later.",
                     "التحليل المالي غير متاح مؤقتًا لأن إحدى الخدمات المصرفية لم تستجب. يرجى المحاولة لاحقًا."));
         }
+    }
+
+
+    private List<String> extractRequestedMonths(String message) {
+        List<String> months = new ArrayList<>();
+        if (message == null) {
+            return months;
+        }
+
+        Map<Integer, String> matchesByPosition = new TreeMap<>();
+
+        java.util.regex.Matcher iso = java.util.regex.Pattern
+                .compile("\\b(20\\d{2})-(0[1-9]|1[0-2])\\b")
+                .matcher(message);
+        while (iso.find()) {
+            matchesByPosition.put(
+                    iso.start(), iso.group(1) + "-" + iso.group(2));
+        }
+
+        String monthNames =
+                "(january|february|march|april|may|june|july|august|"
+                + "september|october|november|december|"
+                + "janvier|fevrier|février|mars|avril|mai|juin|juillet|"
+                + "aout|août|septembre|octobre|novembre|decembre|décembre)";
+
+        java.util.regex.Matcher named = java.util.regex.Pattern.compile(
+                "(?i)\\b" + monthNames
+                + "(?:\\s+(?:and|et)\\s+" + monthNames + ")?\\s+(20\\d{2})\\b")
+                .matcher(message);
+
+        Map<String, Integer> monthNumbers = Map.ofEntries(
+                Map.entry("january", 1), Map.entry("janvier", 1),
+                Map.entry("february", 2), Map.entry("fevrier", 2),
+                Map.entry("février", 2), Map.entry("march", 3),
+                Map.entry("mars", 3), Map.entry("april", 4),
+                Map.entry("avril", 4), Map.entry("may", 5),
+                Map.entry("mai", 5), Map.entry("june", 6),
+                Map.entry("juin", 6), Map.entry("july", 7),
+                Map.entry("juillet", 7), Map.entry("august", 8),
+                Map.entry("aout", 8), Map.entry("août", 8),
+                Map.entry("september", 9), Map.entry("septembre", 9),
+                Map.entry("october", 10), Map.entry("octobre", 10),
+                Map.entry("november", 11), Map.entry("novembre", 11),
+                Map.entry("december", 12), Map.entry("decembre", 12),
+                Map.entry("décembre", 12));
+
+        while (named.find()) {
+            String year = named.group(3);
+
+            for (int group = 1; group <= 2; group++) {
+                String monthName = named.group(group);
+                if (monthName == null) {
+                    continue;
+                }
+
+                Integer monthNumber = monthNumbers.get(
+                        monthName.toLowerCase(Locale.ROOT));
+
+                if (monthNumber != null) {
+                    String month = String.format(
+                            Locale.ROOT, "%04d-%02d",
+                            Integer.parseInt(year), monthNumber);
+
+                    matchesByPosition.put(named.start(group), month);
+                }
+            }
+        }
+
+        for (String month : matchesByPosition.values()) {
+            if (!months.contains(month)) {
+                months.add(month);
+            }
+        }
+
+        return months;
+    }
+
+    private boolean isMonthlyComparisonQuestion(String message) {
+        String text = normalizeText(message);
+        return text.contains("compare my payments")
+                || text.contains("compare my transfers")
+                || text.contains("compare my payments and transfers")
+                || text.contains("compare payments and transfers")
+                || text.contains("compare my payments and transfers")
+                || text.contains("compare mes paiements")
+                || text.contains("compare mes virements")
+                || text.contains("comparer mes paiements")
+                || text.contains("comparer mes virements");
+    }
+
+    private boolean isInternalTransferActivityQuestion(String message) {
+        String text = normalizeText(message);
+        return text.contains("internal transfer activity")
+                || text.contains("which of my accounts")
+                || text.contains("transfer activity by account")
+                || text.contains("activité des virements internes")
+                || text.contains("activite des virements internes")
+                || text.contains("activité des transferts internes")
+                || text.contains("activite des transferts internes");
+    }
+
+    private ChatResponse answerMonthlyComparison(
+            List<Map<String, Object>> payments,
+            List<Map<String, Object>> transfers,
+            Set<Long> ownAccountIds,
+            String firstMonth,
+            String secondMonth,
+            String language,
+            String message) {
+
+        Map<String, Map<String, BigDecimal>> paymentTotals = new TreeMap<>();
+        Map<String, Map<String, Integer>> paymentCountsByStatus = new TreeMap<>();
+        Map<String, Map<String, Map<String, BigDecimal>>> paymentAmountsByStatus =
+                new TreeMap<>();
+        Map<String, Map<String, BigDecimal>> transferOutgoing = new TreeMap<>();
+        Map<String, Map<String, BigDecimal>> transferIncoming = new TreeMap<>();
+        Map<String, Map<String, BigDecimal>> transferInternal = new TreeMap<>();
+
+        for (Map<String, Object> payment : payments) {
+            String createdAt = stringValue(payment.get("createdAt"), "");
+            String month = createdAt.length() >= 7 ? createdAt.substring(0, 7) : "";
+            if (!firstMonth.equals(month) && !secondMonth.equals(month)) {
+                continue;
+            }
+
+            String currency = stringValue(payment.get("currency"), "UNKNOWN");
+            String status = stringValue(payment.get("status"), "UNKNOWN")
+                    .toUpperCase(Locale.ROOT);
+            BigDecimal amount = asDecimal(payment.get("amount"));
+
+            paymentTotals.computeIfAbsent(month, key -> new TreeMap<>())
+                    .merge(currency, amount, BigDecimal::add);
+            paymentCountsByStatus.computeIfAbsent(month, key -> new TreeMap<>())
+                    .merge(status, 1, Integer::sum);
+            paymentAmountsByStatus
+                    .computeIfAbsent(month, key -> new TreeMap<>())
+                    .computeIfAbsent(status, key -> new TreeMap<>())
+                    .merge(currency, amount, BigDecimal::add);
+        }
+
+        for (Map<String, Object> transfer : transfers) {
+            String createdAt = stringValue(transfer.get("createdAt"), "");
+            String month = createdAt.length() >= 7 ? createdAt.substring(0, 7) : "";
+            if (!firstMonth.equals(month) && !secondMonth.equals(month)) {
+                continue;
+            }
+
+            Long sourceId = asLong(transfer.get("sourceAccountId"));
+            Long destinationId = asLong(transfer.get("destinationAccountId"));
+            boolean sourceOwned = sourceId != null && ownAccountIds.contains(sourceId);
+            boolean destinationOwned = destinationId != null
+                    && ownAccountIds.contains(destinationId);
+            String currency = stringValue(transfer.get("currency"), "UNKNOWN");
+            BigDecimal amount = asDecimal(transfer.get("amount"));
+
+            if (sourceOwned && destinationOwned) {
+                transferInternal.computeIfAbsent(month, key -> new TreeMap<>())
+                        .merge(currency, amount, BigDecimal::add);
+            } else if (sourceOwned) {
+                transferOutgoing.computeIfAbsent(month, key -> new TreeMap<>())
+                        .merge(currency, amount, BigDecimal::add);
+            } else if (destinationOwned) {
+                transferIncoming.computeIfAbsent(month, key -> new TreeMap<>())
+                        .merge(currency, amount, BigDecimal::add);
+            }
+        }
+
+        String effective = effectiveLanguage(language, message);
+        StringBuilder result = new StringBuilder();
+        if ("fr".equals(effective)) {
+            result.append("Comparaison mensuelle : ").append(firstMonth)
+                    .append(" vs ").append(secondMonth);
+        } else if ("ar".equals(effective)) {
+            result.append("مقارنة شهرية: ").append(firstMonth)
+                    .append(" مقابل ").append(secondMonth);
+        } else {
+            result.append("Monthly comparison: ").append(firstMonth)
+                    .append(" vs ").append(secondMonth);
+        }
+
+        for (String month : List.of(firstMonth, secondMonth)) {
+            result.append("\n\n").append(month);
+            result.append("\nPayment totals by currency: ")
+                    .append(paymentTotals.getOrDefault(
+                            month, java.util.Collections.emptyMap()));
+            result.append("\nPayment counts by status: ")
+                    .append(paymentCountsByStatus.getOrDefault(
+                            month, java.util.Collections.emptyMap()));
+            result.append("\nPayment amounts by status and currency: ")
+                    .append(paymentAmountsByStatus.getOrDefault(
+                            month, java.util.Collections.emptyMap()));
+            result.append("\nExternal outgoing transfers by currency: ")
+                    .append(transferOutgoing.getOrDefault(
+                            month, java.util.Collections.emptyMap()));
+            result.append("\nExternal incoming transfers by currency: ")
+                    .append(transferIncoming.getOrDefault(
+                            month, java.util.Collections.emptyMap()));
+            result.append("\nInternal transfers by currency: ")
+                    .append(transferInternal.getOrDefault(
+                            month, java.util.Collections.emptyMap()));
+
+            if (month.equals(secondMonth)) {
+                result.append("\nPayment total changes (second month minus first): ")
+                        .append(currencyDifferences(
+                                paymentTotals.getOrDefault(
+                                        secondMonth, java.util.Collections.emptyMap()),
+                                paymentTotals.getOrDefault(
+                                        firstMonth, java.util.Collections.emptyMap())));
+                result.append("\nPayment count changes by status (second month minus first): ")
+                        .append(integerDifferences(
+                                paymentCountsByStatus.getOrDefault(
+                                        secondMonth, java.util.Collections.emptyMap()),
+                                paymentCountsByStatus.getOrDefault(
+                                        firstMonth, java.util.Collections.emptyMap())));
+                result.append("\nExternal outgoing transfer changes: ")
+                        .append(currencyDifferences(
+                                transferOutgoing.getOrDefault(
+                                        secondMonth, java.util.Collections.emptyMap()),
+                                transferOutgoing.getOrDefault(
+                                        firstMonth, java.util.Collections.emptyMap())));
+                result.append("\nExternal incoming transfer changes: ")
+                        .append(currencyDifferences(
+                                transferIncoming.getOrDefault(
+                                        secondMonth, java.util.Collections.emptyMap()),
+                                transferIncoming.getOrDefault(
+                                        firstMonth, java.util.Collections.emptyMap())));
+                result.append("\nInternal transfer changes: ")
+                        .append(currencyDifferences(
+                                transferInternal.getOrDefault(
+                                        secondMonth, java.util.Collections.emptyMap()),
+                                transferInternal.getOrDefault(
+                                        firstMonth, java.util.Collections.emptyMap())));
+            }
+        }
+
+        result.append("\n\nPayment totals and account-transfer totals are kept separate; ")
+                .append("they are not added together because a payment may correspond ")
+                .append("to an account transfer. Differences are calculated as second month ")
+                .append("minus first month, separately for each currency. ")
+                .append("These figures are based only on records returned by the banking services.");
+        return new ChatResponse(result.toString());
+    }
+
+    private Map<String, BigDecimal> currencyDifferences(
+            Map<String, BigDecimal> second,
+            Map<String, BigDecimal> first) {
+        Set<String> currencies = new java.util.TreeSet<>();
+        currencies.addAll(first.keySet());
+        currencies.addAll(second.keySet());
+
+        Map<String, BigDecimal> differences = new TreeMap<>();
+        for (String currency : currencies) {
+            BigDecimal difference = second.getOrDefault(currency, BigDecimal.ZERO)
+                    .subtract(first.getOrDefault(currency, BigDecimal.ZERO));
+            differences.put(currency, difference);
+        }
+        return differences;
+    }
+
+    private Map<String, Integer> integerDifferences(
+            Map<String, Integer> second,
+            Map<String, Integer> first) {
+        Set<String> statuses = new java.util.TreeSet<>();
+        statuses.addAll(first.keySet());
+        statuses.addAll(second.keySet());
+
+        Map<String, Integer> differences = new TreeMap<>();
+        for (String status : statuses) {
+            differences.put(
+                    status,
+                    second.getOrDefault(status, 0) - first.getOrDefault(status, 0));
+        }
+        return differences;
+    }
+
+    private ChatResponse answerInternalTransferActivity(
+            List<Map<String, Object>> transfers,
+            List<Map<String, Object>> accounts,
+            Set<Long> ownAccountIds,
+            String month,
+            boolean filterByMonth,
+            String language,
+            String message) {
+
+        Map<Long, Integer> counts = new TreeMap<>();
+        Map<Long, Map<String, BigDecimal>> amounts = new TreeMap<>();
+
+        for (Map<String, Object> transfer : transfers) {
+            String createdAt = stringValue(transfer.get("createdAt"), "");
+            if (filterByMonth && !createdAt.startsWith(month)) {
+                continue;
+            }
+
+            Long sourceId = asLong(transfer.get("sourceAccountId"));
+            Long destinationId = asLong(transfer.get("destinationAccountId"));
+            if (sourceId == null || destinationId == null
+                    || !ownAccountIds.contains(sourceId)
+                    || !ownAccountIds.contains(destinationId)) {
+                continue;
+            }
+
+            String currency = stringValue(transfer.get("currency"), "UNKNOWN");
+            BigDecimal amount = asDecimal(transfer.get("amount"));
+
+            counts.merge(sourceId, 1, Integer::sum);
+            amounts.computeIfAbsent(sourceId, key -> new TreeMap<>())
+                    .merge(currency, amount, BigDecimal::add);
+
+            if (!sourceId.equals(destinationId)) {
+                counts.merge(destinationId, 1, Integer::sum);
+                amounts.computeIfAbsent(destinationId, key -> new TreeMap<>())
+                        .merge(currency, amount, BigDecimal::add);
+            }
+        }
+
+        String effective = effectiveLanguage(language, message);
+        StringBuilder result = new StringBuilder();
+        if ("fr".equals(effective)) {
+            result.append("Activité des transferts internes");
+        } else if ("ar".equals(effective)) {
+            result.append("نشاط التحويلات الداخلية");
+        } else {
+            result.append("Internal transfer activity");
+        }
+        result.append(filterByMonth ? " — " + month : " — all available dates");
+
+        boolean found = false;
+        for (Map<String, Object> account : accounts) {
+            Long id = asLong(account.get("id"));
+            if (id == null) {
+                continue;
+            }
+            int count = counts.getOrDefault(id, 0);
+            Map<String, BigDecimal> totals = amounts.getOrDefault(
+                    id, java.util.Collections.emptyMap());
+            result.append("\n- Account ").append(id)
+                    .append(": ").append(count)
+                    .append(" transfer(s), amounts by currency: ").append(totals);
+            found = true;
+        }
+
+        if (!found || counts.isEmpty()) {
+            result.append("\nNo internal transfers were found in the selected period.");
+        }
+
+        result.append("\nEach internal transfer is counted for every account involved; ")
+                .append("per-account amounts therefore describe activity, not unique money flows.");
+        return new ChatResponse(result.toString());
+    }
+
+    private String extractRequestedMonth(String message) {
+        if (message == null) {
+            return null;
+        }
+
+        java.util.regex.Matcher iso = java.util.regex.Pattern
+                .compile("\\b(20\\d{2})-(0[1-9]|1[0-2])\\b")
+                .matcher(message);
+        if (iso.find()) {
+            return iso.group(1) + "-" + iso.group(2);
+        }
+
+        java.util.regex.Matcher named = java.util.regex.Pattern.compile(
+                "(?i)\\b(january|february|march|april|may|june|july|august|"
+                + "september|october|november|december)\\s+(20\\d{2})\\b")
+                .matcher(message);
+
+        if (named.find()) {
+            java.time.Month month = java.time.Month.valueOf(
+                    named.group(1).toUpperCase(Locale.ROOT));
+            return String.format(Locale.ROOT, "%04d-%02d",
+                    Integer.parseInt(named.group(2)), month.getValue());
+        }
+
+        return null;
+    }
+
+    private boolean isPaymentHistoryQuestion(String message) {
+        String text = normalizeText(message);
+        return text.contains("payment history")
+                || text.contains("show me my payments")
+                || text.contains("list my payments")
+                || text.contains("list all my payments")
+                || text.contains("historique des paiements")
+                || text.contains("historique de mes paiements")
+                || text.contains("affiche mes paiements")
+                || text.contains("liste de mes paiements");
+    }
+
+    private boolean isFailedPaymentQuestion(String message) {
+        String text = normalizeText(message);
+        return text.contains("failed payment")
+                || text.contains("failed payments")
+                || text.contains("payment failed")
+                || text.contains("most recent failed")
+                || text.contains("paiements echoues")
+                || text.contains("paiement echoue")
+                || text.contains("paiements en echec")
+                || text.contains("motif d'echec")
+                || text.contains("failure reason");
+    }
+
+    private ChatResponse answerPaymentHistory(
+            List<Map<String, Object>> payments,
+            String month,
+            boolean filterByMonth,
+            boolean failedOnly,
+            String language,
+            String message) {
+
+        List<Map<String, Object>> selected = new ArrayList<>();
+
+        for (Map<String, Object> payment : payments) {
+            String status = stringValue(payment.get("status"), "UNKNOWN")
+                    .toUpperCase(Locale.ROOT);
+            String createdAt = stringValue(payment.get("createdAt"), "");
+
+            if (failedOnly && !"FAILED".equals(status)) {
+                continue;
+            }
+            if (filterByMonth && !createdAt.startsWith(month)) {
+                continue;
+            }
+            selected.add(payment);
+        }
+
+        selected.sort((left, right) ->
+                stringValue(right.get("createdAt"), "")
+                        .compareTo(stringValue(left.get("createdAt"), "")));
+
+        String effective = effectiveLanguage(language, message);
+        StringBuilder result = new StringBuilder();
+
+        if ("fr".equals(effective)) {
+            result.append(failedOnly
+                    ? "Paiements échoués"
+                    : "Historique des paiements");
+            result.append(filterByMonth ? " — " + month : " — toutes les périodes");
+        } else if ("ar".equals(effective)) {
+            result.append(failedOnly ? "المدفوعات الفاشلة" : "سجل المدفوعات");
+            result.append(filterByMonth ? " — " + month : " — جميع الفترات");
+        } else {
+            result.append(failedOnly ? "Failed payments" : "Payment history");
+            result.append(filterByMonth ? " — " + month : " — all available dates");
+        }
+
+        result.append("\n");
+        if (selected.isEmpty()) {
+            result.append("fr".equals(effective)
+                    ? "\\nAucun paiement correspondant n'a été trouvé dans les données disponibles."
+                    : "ar".equals(effective)
+                        ? "\\nلم يتم العثور على مدفوعات مطابقة في البيانات المتاحة."
+                        : "\\nNo matching payments were found in the available data.");
+        } else {
+            result.append("\n");
+            for (Map<String, Object> payment : selected) {
+                result.append("- Date : ")
+                        .append(stringValue(payment.get("createdAt"), "indisponible"))
+                        .append(" | Montant : ")
+                        .append(stringValue(payment.get("amount"), "indisponible"))
+                        .append(" ")
+                        .append(stringValue(payment.get("currency"), "devise inconnue"))
+                        .append(" | Statut : ")
+                        .append(stringValue(payment.get("status"), "inconnu"))
+                        .append(" | Référence : ")
+                        .append(stringValue(payment.get("reference"), "indisponible"))
+                        .append("\n");
+            }
+        }
+
+        if (failedOnly) {
+            result.append("\n");
+            result.append("fr".equals(effective)
+                    ? "Le service de paiement ne fournit pas de motif d'échec ni de nom de bénéficiaire dans les données disponibles."
+                    : "ar".equals(effective)
+                        ? "خدمة الدفع لا توفر سبب الفشل أو اسم المستفيد ضمن البيانات المتاحة."
+                        : "The payment service does not provide a failure reason or recipient name in the available data.");
+        }
+
+        return new ChatResponse(result.toString());
     }
 
     private List<Map<String, Object>> getServiceList(
@@ -359,6 +909,30 @@ public class ChatService {
         return value == null ? fallback : value.toString();
     }
 
+    private boolean isFocusedPaymentOrTransferQuestion(String message) {
+        String text = normalizeText(message);
+
+        return text.contains("summary of my payments")
+                || text.contains("payments by status")
+                || text.contains("payment history")
+                || text.contains("payment summary")
+                || text.contains("analyze my payments")
+                || text.contains("summary of my transfers")
+                || text.contains("transfers by status")
+                || text.contains("transfer history")
+                || text.contains("transfer summary")
+                || text.contains("analyze my transfers")
+                || text.contains("incoming transfers")
+                || text.contains("outgoing transfers")
+                || text.contains("transfers between my own accounts")
+                || text.contains("résumé des paiements")
+                || text.contains("resume des paiements")
+                || text.contains("résumé des virements")
+                || text.contains("resume des virements")
+                || text.contains("analyse mes paiements")
+                || text.contains("analyse mes virements");
+    }
+
     private String generateFinancialExplanation(
             String userMessage, String language, String facts) {
         String lang = effectiveLanguage(language, userMessage);
@@ -371,6 +945,11 @@ public class ChatService {
                 Treat the calculated facts below as the sole source of truth.
                 Do not change, recalculate, convert, round, or reformat any
                 amount, currency, count, status, or reporting period.
+                Before writing the conclusion, verify that it agrees with every
+                relevant figure above. Never say a category has no transactions
+                if its supplied count or amount is non-zero. Distinguish zero
+                external transfers from internal transfers; they are different
+                categories. Do not contradict any supplied count or amount.
                 Preserve currency codes exactly, such as TND; never replace
                 them with a currency symbol such as $.
                 Do not invent transactions, causes, trends, forecasts, or data.
@@ -395,7 +974,7 @@ public class ChatService {
         request.put("messages", java.util.Collections.singletonList(
                 Map.of("role", "user", "content", prompt)));
         request.put("stream", false);
-        request.put("options", Map.of("temperature", 0.1, "num_predict", 300));
+        request.put("options", Map.of("temperature", 0.1, "num_predict", 180));
 
         try {
             @SuppressWarnings("unchecked")
@@ -537,7 +1116,13 @@ public class ChatService {
 
         String text = normalizeText(message);
         if (text.contains("solde") || text.contains("compte")
-                || text.contains("combien") || text.contains("mes comptes")) {
+                || text.contains("combien") || text.contains("mes comptes")
+                || text.contains("paiement") || text.contains("paiements")
+                || text.contains("virement") || text.contains("virements")
+                || text.contains("comparer") || text.contains("compare mes")
+                || text.contains("historique") || text.contains("échoué")
+                || text.contains("echoue") || text.contains("échec")
+                || text.contains("echec")) {
             return "fr";
         }
 

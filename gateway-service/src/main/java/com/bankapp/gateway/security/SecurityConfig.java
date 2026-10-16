@@ -69,7 +69,8 @@ public class SecurityConfig {
                 "Content-Type",
                 "Accept",
                 "Origin",
-                "X-Response-Language"
+                "X-Response-Language",
+                "X-Conversation-Id"
         ));
 
         configuration.setExposedHeaders(List.of(

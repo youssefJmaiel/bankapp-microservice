@@ -302,6 +302,16 @@ services:
       OLLAMA_MODEL: qwen2.5:3b
       ACCOUNT_SERVICE_BASE_URL: http://account-service:8089
       PAYMENT_SERVICE_BASE_URL: http://payment-service:8088
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/bankapp
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: ai_schema
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_DEFAULT_SCHEMA: ai_schema
+      SPRING_LIQUIBASE_LIQUIBASE_SCHEMA: public
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

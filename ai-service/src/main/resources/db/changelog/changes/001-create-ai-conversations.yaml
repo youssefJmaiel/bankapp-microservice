@@ -1,0 +1,124 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-ai-schema
+      author: youssef
+      changes:
+        - sql:
+            sql: CREATE SCHEMA IF NOT EXISTS ai_schema
+
+  - changeSet:
+      id: 002-create-ai-conversations
+      author: youssef
+      changes:
+        - createTable:
+            tableName: ai_conversations
+            schemaName: ai_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_ai_conversations
+                    nullable: false
+              - column:
+                  name: owner_subject
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            indexName: idx_ai_conversations_owner_updated
+            schemaName: ai_schema
+            tableName: ai_conversations
+            columns:
+              - column:
+                  name: owner_subject
+              - column:
+                  name: updated_at
+
+  - changeSet:
+      id: 003-create-ai-messages
+      author: youssef
+      changes:
+        - createTable:
+            tableName: ai_messages
+            schemaName: ai_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_ai_messages
+                    nullable: false
+              - column:
+                  name: conversation_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: content
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableSchemaName: ai_schema
+            baseTableName: ai_messages
+            baseColumnNames: conversation_id
+            constraintName: fk_ai_messages_conversation
+            referencedTableSchemaName: ai_schema
+            referencedTableName: ai_conversations
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+        - createIndex:
+            indexName: idx_ai_messages_conversation_created
+            schemaName: ai_schema
+            tableName: ai_messages
+            columns:
+              - column:
+                  name: conversation_id
+              - column:
+                  name: created_at
+
+  - changeSet:
+      id: 004-check-ai-message-role
+      author: youssef
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE ai_schema.ai_messages
+              ADD CONSTRAINT chk_ai_messages_role
+              CHECK (role IN ('USER', 'ASSISTANT'))
