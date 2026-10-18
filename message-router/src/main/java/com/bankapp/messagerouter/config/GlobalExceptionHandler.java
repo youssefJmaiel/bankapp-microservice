@@ -83,9 +83,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(org.springframework.web.server.MethodNotAllowedException.class)
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<Map<String, Object>> handleMethodNotAllowed(
-            org.springframework.web.server.MethodNotAllowedException ex) {
+            org.springframework.web.HttpRequestMethodNotSupportedException ex) {
 
         log.warn("Method not allowed: {}", getExceptionMessage(ex));
 

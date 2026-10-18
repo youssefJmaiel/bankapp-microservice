@@ -74,7 +74,7 @@ class EmployeeServiceTest {
                 .email("other@example.com")
                 .build();
 
-        when(employeeRepository.findById(employeeId))
+        when(employeeRepository.findByIdAndArchivedFalse(employeeId))
                 .thenReturn(Optional.of(employee));
         when(employeeRepository.existsByNormalizedEmailAndIdNot(
                 request.getEmail(), employeeId))
@@ -105,7 +105,7 @@ class EmployeeServiceTest {
                 .email("user@example.com")
                 .build();
 
-        when(employeeRepository.findById(employeeId))
+        when(employeeRepository.findByIdAndArchivedFalse(employeeId))
                 .thenReturn(Optional.of(employee));
         when(employeeRepository.existsByNormalizedEmailAndIdNot(
                 request.getEmail(), employeeId))

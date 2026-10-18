@@ -39,6 +39,9 @@ public class MqConfig {
     @Value("${ibm.mq.inputQueue}")
     private String inputQueueName;
 
+    @Value("${ibm.mq.listener.auto-startup:true}")
+    private boolean listenerAutoStartup;
+
     @Bean
     public MQQueueConnectionFactory mqQueueConnectionFactory() throws JMSException {
         MQQueueConnectionFactory factory = new MQQueueConnectionFactory();
@@ -106,6 +109,7 @@ public class MqConfig {
 
         container.setConcurrentConsumers(1);
         container.setMaxConcurrentConsumers(5);
+        container.setAutoStartup(listenerAutoStartup);
 
         return container;
     }

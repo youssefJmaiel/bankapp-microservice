@@ -13,6 +13,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -216,5 +219,67 @@ class MessageControllerTest {
                         .value("Alice"))
                 .andExpect(jsonPath("$.receiver")
                         .value("Bob"));
+    }
+
+
+    // ---------------------- SECURITY AND VALIDATION ----------------------
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void userRole_shouldBeForbiddenFromAdminEndpoint() throws Exception {
+        mockMvc.perform(get("/api/messages"))
+                .andExpect(status().isForbidden());
+    }
+    @Test
+    void unauthenticatedRequest_shouldReturnUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/messages"))
+                .andExpect(status().isUnauthorized());
+    }
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void createMessage_shouldRejectBlankRequiredFields() throws Exception {
+        mockMvc.perform(post("/api/message")
+                        .contentType("application/json")
+                        .content("{\"content\":\" \",\"sender\":\"\",\"receiver\":\"Bob\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Bad Request"));
+    }
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void createMessage_shouldRejectContentLongerThan500Characters() throws Exception {
+        MessageRequest request = MessageRequest.builder()
+                .content("x".repeat(501))
+                .sender("Alice")
+                .receiver("Bob")
+                .build();
+
+        mockMvc.perform(post("/api/message")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Bad Request"));
+    }
+    @Test
+    void getMyMessages_shouldUseAuthenticatedUsername() throws Exception {
+        when(messageService.getMessagesForReceiver("alice"))
+                .thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/messages/my")
+                        .with(jwt().jwt(token ->
+                                token.claim("preferred_username", "alice"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        org.mockito.Mockito.verify(messageService)
+                .getMessagesForReceiver("alice");
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void unsupportedHttpMethod_shouldReturnMethodNotAllowed() throws Exception {
+        mockMvc.perform(patch("/api/messages"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.error").value("Method Not Allowed"));
     }
 }
