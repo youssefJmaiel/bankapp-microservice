@@ -6,6 +6,7 @@ import com.bankapp.payment.domain.PaymentDto;
 import com.bankapp.payment.entity.Payment;
 import com.bankapp.payment.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,16 +27,18 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PaymentDtoConverter paymentDtoConverter;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
     @Value("${bankapp.account-service.url:http://account-service:8089}")
     private String accountServiceUrl;
 
     public PaymentService(
             PaymentRepository paymentRepository,
-            PaymentDtoConverter paymentDtoConverter) {
+            PaymentDtoConverter paymentDtoConverter,
+            RestTemplateBuilder restTemplateBuilder) {
         this.paymentRepository = paymentRepository;
         this.paymentDtoConverter = paymentDtoConverter;
+        this.restTemplate = restTemplateBuilder.build();
     }
 
     public PaymentDto createPayment(

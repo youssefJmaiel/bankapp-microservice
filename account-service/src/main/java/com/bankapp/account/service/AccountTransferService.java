@@ -38,12 +38,74 @@ public class AccountTransferService {
                         accountIds, accountIds);
     }
 
+    @Transactional
     public AccountTransfer transfer(
             AccountTransferRequest request,
             String userId,
             String username) {
 
+        // Valider la requête avant tout accès aux dépôts.
+        if (request == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "La requête de virement est obligatoire");
+        }
+
         Long sourceId = request.getSourceAccountId();
+        if (sourceId == null || sourceId <= 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "L'identifiant du compte source doit être positif");
+        }
+
+        BigDecimal validatedAmount = request.getAmount();
+        if (validatedAmount == null
+                || validatedAmount.compareTo(BigDecimal.ZERO) <= 0
+                || validatedAmount.scale() > 2
+                || validatedAmount.precision() - validatedAmount.scale() > 17) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Le montant doit être positif et comporter au maximum 17 chiffres entiers et deux décimales");
+        }
+
+        String validatedCurrency = request.getCurrency();
+        if (validatedCurrency == null
+                || !validatedCurrency.matches("^[A-Z]{3}$")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La devise doit être un code de trois lettres majuscules");
+        }
+
+        String validatedReference = request.getReference();
+        if (validatedReference == null
+                || !validatedReference.matches("^[A-Za-z0-9_-]{3,100}$")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La référence doit contenir entre 3 et 100 caractères alphanumériques, tirets ou underscores");
+        }
+
+        Long requestedDestinationId = request.getDestinationAccountId();
+        String requestedDestinationNumber = request.getDestinationAccountNumber();
+        boolean hasDestinationNumber = requestedDestinationNumber != null
+                && !requestedDestinationNumber.trim().isEmpty();
+
+        if (requestedDestinationId == null && !hasDestinationNumber) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Le compte destinataire est obligatoire");
+        }
+
+        if (requestedDestinationId != null && requestedDestinationId <= 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "L'identifiant du compte destinataire doit être positif");
+        }
+
+        if (hasDestinationNumber
+                && !requestedDestinationNumber.trim().matches("^TN[0-9]{22}$")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Le numéro de compte doit commencer par TN et contenir 22 chiffres");
+        }
 
         Long destinationId;
         if (request.getDestinationAccountNumber() != null
