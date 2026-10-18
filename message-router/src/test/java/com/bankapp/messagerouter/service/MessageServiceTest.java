@@ -286,4 +286,77 @@ class MessageServiceTest {
         assertEquals("Alice", result.getSender());
         assertEquals("Bob", result.getReceiver());
     }
+
+
+    @Test
+    void getMessagesForReceiver_shouldReturnOnlyMessagesForReceiver() {
+        Message message = new Message();
+        message.setId(21L);
+        message.setContent("Private message");
+        message.setSender("bob");
+        message.setReceiver("alice");
+
+        when(messageRepository.findByReceiver("alice"))
+                .thenReturn(List.of(message));
+
+        List<MessageDto> result =
+                messageService.getMessagesForReceiver("alice");
+
+        assertEquals(1, result.size());
+        assertEquals(21L, result.get(0).getId());
+        assertEquals("Private message", result.get(0).getContent());
+        verify(messageRepository).findByReceiver("alice");
+    }
+
+    @Test
+    void getMessagesForReceiver_shouldReturnEmptyListWhenNoMessagesExist() {
+        when(messageRepository.findByReceiver("alice"))
+                .thenReturn(List.of());
+
+        List<MessageDto> result =
+                messageService.getMessagesForReceiver("alice");
+
+        assertTrue(result.isEmpty());
+        verify(messageRepository).findByReceiver("alice");
+    }
+
+    @Test
+    void getMessagesPaginated_shouldUseDescendingSortWhenDirectionIsDesc()
+            {
+        when(messageRepository.findAll(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        messageService.getMessagesPaginated(0, 10, "timestamp", "desc");
+
+        ArgumentCaptor<Pageable> captor =
+                ArgumentCaptor.forClass(Pageable.class);
+        verify(messageRepository).findAll(captor.capture());
+
+        assertEquals(0, captor.getValue().getPageNumber());
+        assertEquals(10, captor.getValue().getPageSize());
+        assertEquals(
+                Sort.Direction.DESC,
+                captor.getValue().getSort().getOrderFor("timestamp").getDirection()
+        );
+    }
+
+    @Test
+    void getMessagesPaginated_shouldUseAscendingSortWhenDirectionIsAsc() {
+        when(messageRepository.findAll(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        messageService.getMessagesPaginated(1, 5, "id", "asc");
+
+        ArgumentCaptor<Pageable> captor =
+                ArgumentCaptor.forClass(Pageable.class);
+        verify(messageRepository).findAll(captor.capture());
+
+        assertEquals(1, captor.getValue().getPageNumber());
+        assertEquals(5, captor.getValue().getPageSize());
+        assertEquals(
+                Sort.Direction.ASC,
+                captor.getValue().getSort().getOrderFor("id").getDirection()
+        );
+    }
+
 }
