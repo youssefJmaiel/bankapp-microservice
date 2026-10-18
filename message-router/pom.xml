@@ -92,11 +92,6 @@
 			<artifactId>com.ibm.mq.allclient</artifactId>
 			<version>9.4.0.0</version>
 		</dependency>
-		<dependency>
-			<groupId>com.ibm.mq</groupId>
-			<artifactId>mq-jms-spring</artifactId>
-			<version>3.0.0</version>
-		</dependency>
 
 		<!-- Liquibase Database Migrations -->
 		<dependency>
