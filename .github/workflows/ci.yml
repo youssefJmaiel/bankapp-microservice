@@ -38,6 +38,14 @@ jobs:
           java -version
           ./bankapp-platform/mvnw -version
 
+      - name: Build and install shared domain modules
+        run: >
+          ./bankapp-platform/mvnw
+          -B
+          -ntp
+          -f bankapp-domain/pom.xml
+          clean install
+
       - name: Build all platform modules and run tests
         run: >
           ./bankapp-platform/mvnw
