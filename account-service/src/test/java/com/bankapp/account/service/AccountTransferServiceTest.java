@@ -272,4 +272,156 @@ class AccountTransferServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         verify(accountRepository, never()).findByIdForUpdate(any());
     }
+
+
+    @Test
+    void transferShouldRejectNullRequest() {
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> transferService.transfer(null, "user-123", "youssef"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        verifyNoInteractions(accountRepository, transferRepository);
+    }
+
+    @Test
+    void transferShouldRejectAmountWithMoreThanTwoDecimals() {
+        request.setAmount(new BigDecimal("25.001"));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> transferService.transfer(request, "user-123", "youssef"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        verifyNoInteractions(accountRepository, transferRepository);
+    }
+
+    @Test
+    void transferShouldRejectUnknownDestinationAccountNumber() {
+        request.setDestinationAccountId(null);
+        request.setDestinationAccountNumber("TN1234567890123456789012");
+        when(accountRepository.findByAccountNumber("TN1234567890123456789012"))
+                .thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> transferService.transfer(request, "user-123", "youssef"));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        verify(accountRepository, never()).findByIdForUpdate(any());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(transferRepository, never()).saveAndFlush(any(AccountTransfer.class));
+    }
+
+    @Test
+    void transferShouldRejectMismatchedDestinationIdAndNumber() {
+        request.setDestinationAccountId(1L);
+        request.setDestinationAccountNumber("TN1234567890123456789012");
+
+        Account accountWithNumber = account(
+                3L, "user-456", "TND", "40.00", "ACTIVE");
+        when(accountRepository.findByAccountNumber("TN1234567890123456789012"))
+                .thenReturn(Optional.of(accountWithNumber));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> transferService.transfer(request, "user-123", "youssef"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        verify(accountRepository, never()).findByIdForUpdate(any());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(transferRepository, never()).saveAndFlush(any(AccountTransfer.class));
+    }
+
+    @Test
+    void transferShouldRejectTransferToSameAccount() {
+        request.setDestinationAccountId(2L);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> transferService.transfer(request, "user-123", "youssef"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        verifyNoInteractions(accountRepository, transferRepository);
+    }
+
+
+    @Test
+    void transferShouldRejectReusedReferenceWithDifferentDestination() {
+        Account source = account(2L, "user-123", "TND", "100.00", "ACTIVE");
+        Account destination = account(1L, "user-456", "TND", "40.00", "ACTIVE");
+        stubAccounts(source, destination);
+
+        AccountTransfer existing = new AccountTransfer();
+        existing.setReference("REF-123");
+        existing.setSourceAccountId(2L);
+        existing.setDestinationAccountId(3L);
+        existing.setAmount(new BigDecimal("25.00"));
+        existing.setCurrency("TND");
+
+        when(transferRepository.findByReference("REF-123"))
+                .thenReturn(Optional.of(existing));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> transferService.transfer(request, "user-123", "youssef"));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(transferRepository, never()).saveAndFlush(any(AccountTransfer.class));
+    }
+
+    @Test
+    void transferShouldRejectReusedReferenceWithDifferentCurrency() {
+        Account source = account(2L, "user-123", "TND", "100.00", "ACTIVE");
+        Account destination = account(1L, "user-456", "TND", "40.00", "ACTIVE");
+        stubAccounts(source, destination);
+
+        AccountTransfer existing = new AccountTransfer();
+        existing.setReference("REF-123");
+        existing.setSourceAccountId(2L);
+        existing.setDestinationAccountId(1L);
+        existing.setAmount(new BigDecimal("25.00"));
+        existing.setCurrency("EUR");
+
+        when(transferRepository.findByReference("REF-123"))
+                .thenReturn(Optional.of(existing));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> transferService.transfer(request, "user-123", "youssef"));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(transferRepository, never()).saveAndFlush(any(AccountTransfer.class));
+    }
+
+    @Test
+    void transferShouldRejectInactiveDestinationAccount() {
+        Account source = account(2L, "user-123", "TND", "100.00", "ACTIVE");
+        Account destination = account(1L, "user-456", "TND", "40.00", "INACTIVE");
+        stubAccounts(source, destination);
+        when(transferRepository.findByReference("REF-123"))
+                .thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> transferService.transfer(request, "user-123", "youssef"));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(transferRepository, never()).saveAndFlush(any(AccountTransfer.class));
+    }
+
+    @Test
+    void transferShouldRejectNegativeDestinationId() {
+        request.setDestinationAccountId(-1L);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> transferService.transfer(request, "user-123", "youssef"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        verifyNoInteractions(accountRepository, transferRepository);
+    }
 }
