@@ -1,0 +1,58 @@
+name: BankApp Microservices CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bankapp-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test (Java 17)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Verify Java and Maven
+        run: |
+          java -version
+          ./bankapp-platform/mvnw -version
+
+      - name: Build all platform modules and run tests
+        run: >
+          ./bankapp-platform/mvnw
+          -B
+          -ntp
+          -f bankapp-platform/pom.xml
+          clean verify
+
+      - name: Upload test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bankapp-test-reports
+          path: |
+            **/target/surefire-reports/*.xml
+            **/target/site/jacoco/**
+          if-no-files-found: warn
+          retention-days: 14
