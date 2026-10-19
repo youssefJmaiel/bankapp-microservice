@@ -4,6 +4,7 @@ import com.bankapp.account.config.SecurityConfig;
 import com.bankapp.account.domain.AccountDto;
 import com.bankapp.account.controller.AccountController;
 import com.bankapp.account.service.AccountService;
+import com.bankapp.account.service.AccountCreditService;
 import com.bankapp.account.service.AccountTransferService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,9 @@ class AccountSecurityTest {
 
     @MockBean
     private AccountTransferService accountTransferService;
+
+    @MockBean
+    private AccountCreditService accountCreditService;
 
     @Test
     void anonymousRequestToProtectedApi_returns401() throws Exception {
@@ -180,6 +184,22 @@ class AccountSecurityTest {
                 .andExpect(status().isOk())
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
                         .jsonPath("$.ownerId").value("other-user"));
+    }
+
+
+    @Test
+    void userWithoutAdminRole_cannotCreditAccount() throws Exception {
+        mockMvc.perform(post("/api/accounts/1/credit")
+                        .with(jwt()
+                                .jwt(token -> token
+                                        .subject("user-123")
+                                        .claim("preferred_username", "youssef"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"amount\":50.00,\"reference\":\"CREDIT_123\"}"))
+                .andExpect(status().isForbidden());
+
+        verify(accountCreditService, never()).credit(any(), any());
     }
 
 }

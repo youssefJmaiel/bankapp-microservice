@@ -1,10 +1,13 @@
 package com.bankapp.account.controller;
 
 import com.bankapp.account.domain.AccountDto;
+import com.bankapp.account.domain.AccountCreditDto;
+import com.bankapp.account.domain.CreditAccountRequest;
 import com.bankapp.account.domain.CreateAccountRequest;
 import com.bankapp.account.domain.AccountTransferRequest;
 import com.bankapp.account.entity.AccountTransfer;
 import com.bankapp.account.service.AccountTransferService;
+import com.bankapp.account.service.AccountCreditService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,11 +27,22 @@ public class AccountController {
 
     private final AccountService accountService;
     private final AccountTransferService accountTransferService;
+    private final AccountCreditService accountCreditService;
 
     public AccountController(AccountService accountService,
-                             AccountTransferService accountTransferService) {
+                             AccountTransferService accountTransferService,
+                             AccountCreditService accountCreditService) {
         this.accountService = accountService;
         this.accountTransferService = accountTransferService;
+        this.accountCreditService = accountCreditService;
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{id}/credit")
+    public ResponseEntity<AccountCreditDto> creditAccount(
+            @PathVariable Long id,
+            @Valid @RequestBody CreditAccountRequest request) {
+        return ResponseEntity.ok(accountCreditService.credit(id, request));
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")

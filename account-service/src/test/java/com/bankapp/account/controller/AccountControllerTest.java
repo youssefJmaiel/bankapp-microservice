@@ -1,10 +1,13 @@
 package com.bankapp.account.controller;
 
 import com.bankapp.account.domain.AccountDto;
+import com.bankapp.account.domain.AccountCreditDto;
+import com.bankapp.account.domain.CreditAccountRequest;
 import com.bankapp.account.domain.AccountTransferRequest;
 import com.bankapp.account.domain.CreateAccountRequest;
 import com.bankapp.account.entity.AccountTransfer;
 import com.bankapp.account.service.AccountService;
+import com.bankapp.account.service.AccountCreditService;
 import com.bankapp.account.service.AccountTransferService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -48,6 +51,9 @@ class AccountControllerTest {
 
     @MockBean
     private AccountTransferService accountTransferService;
+
+    @MockBean
+    private AccountCreditService accountCreditService;
 
     private AccountDto account(Long id, String owner, String number) {
         return AccountDto.builder()
@@ -279,4 +285,48 @@ class AccountControllerTest {
 
         verify(accountTransferService, never()).findTransfersForAccounts(any());
     }
+
+    @Test
+    void creditAccount_adminCanCreditAccount() throws Exception {
+        AccountCreditDto result = new AccountCreditDto();
+        result.setId(10L);
+        result.setAccountId(1L);
+        result.setAmount(new BigDecimal("50.00"));
+        result.setCurrency("TND");
+        result.setReference("CREDIT_123");
+        result.setBalanceAfter(new BigDecimal("150.00"));
+        result.setCreatedAt(LocalDateTime.of(2026, 1, 1, 12, 0));
+
+        when(accountCreditService.credit(
+                eq(1L), any(CreditAccountRequest.class))).thenReturn(result);
+
+        mockMvc.perform(post("/api/accounts/1/credit")
+                        .with(jwt().jwt(jwtFor("admin-123", "admin"))
+                                .authorities(() -> "ROLE_ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"amount\":50.00,\"reference\":\"CREDIT_123\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accountId").value(1))
+                .andExpect(jsonPath("$.amount").value(50.00))
+                .andExpect(jsonPath("$.currency").value("TND"))
+                .andExpect(jsonPath("$.reference").value("CREDIT_123"))
+                .andExpect(jsonPath("$.balanceAfter").value(150.00));
+
+        verify(accountCreditService).credit(
+                eq(1L), any(CreditAccountRequest.class));
+    }
+
+    @Test
+    void creditAccount_zeroAmount_returnsBadRequest() throws Exception {
+        mockMvc.perform(post("/api/accounts/1/credit")
+                        .with(jwt().jwt(jwtFor("admin-123", "admin"))
+                                .authorities(() -> "ROLE_ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"amount\":0,\"reference\":\"CREDIT_123\"}"))
+                .andExpect(status().isBadRequest());
+
+        verify(accountCreditService, never()).credit(
+                eq(1L), any(CreditAccountRequest.class));
+    }
+
 }

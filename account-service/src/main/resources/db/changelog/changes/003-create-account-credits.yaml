@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-create-account-credits
+      author: bankapp
+      changes:
+        - createTable:
+            tableName: account_credits
+            schemaName: account_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_account_credits
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_account_credits_account
+                    references: account_schema.accounts(id)
+              - column:
+                  name: amount
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reference
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_account_credits_reference
+              - column:
+                  name: balance_after
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              ALTER TABLE account_schema.account_credits
+              ADD CONSTRAINT chk_account_credits_amount_positive
+              CHECK (amount > 0)
