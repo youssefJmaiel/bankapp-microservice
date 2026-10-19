@@ -4,6 +4,7 @@ import com.bankapp.hr.converter.EmployeeDtoConverter;
 import com.bankapp.hr.converter.EmployeeRequestConverter;
 import com.bankapp.hr.dto.EmployeeDto;
 import com.bankapp.hr.dto.EmployeeRequest;
+import com.bankapp.hr.dto.KeycloakUserDto;
 import com.bankapp.hr.entity.Employee;
 import com.bankapp.hr.exception.DuplicateEmailException;
 import com.bankapp.hr.repository.EmployeeRepository;
@@ -23,6 +24,10 @@ public class EmployeeService {
     private final EmployeeRequestConverter employeeRequestConverter;
     private final EmployeeDtoConverter employeeDtoConverter;
     private final KeycloakAdminService keycloakAdminService;
+
+    public List<KeycloakUserDto> getKeycloakUsers() {
+        return keycloakAdminService.getUsers();
+    }
 
     @Transactional
     public List<EmployeeDto> getAllEmployees() {

@@ -2,6 +2,7 @@ package com.bankapp.hr.controller;
 
 import com.bankapp.hr.dto.EmployeeDto;
 import com.bankapp.hr.dto.EmployeeRequest;
+import com.bankapp.hr.dto.KeycloakUserDto;
 import com.bankapp.hr.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,12 @@ import java.util.List;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+
+    @GetMapping("/keycloak-users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<KeycloakUserDto> getKeycloakUsers() {
+        return employeeService.getKeycloakUsers();
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")

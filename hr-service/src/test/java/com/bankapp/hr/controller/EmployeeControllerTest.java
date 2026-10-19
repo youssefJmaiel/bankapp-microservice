@@ -1,6 +1,7 @@
 package com.bankapp.hr.controller;
 
 import com.bankapp.hr.dto.EmployeeDto;
+import com.bankapp.hr.dto.KeycloakUserDto;
 import com.bankapp.hr.service.EmployeeService;
 import com.bankapp.hr.config.SecurityConfig;
 import org.junit.jupiter.api.Test;
@@ -91,6 +92,47 @@ class EmployeeControllerTest {
                 .content("{\"firstName\":\"Amira\",\"lastName\":\"Ben Ali\",\"email\":\"amira@example.com\"}"))
             .andExpect(status().isForbidden());
         verify(service, never()).createEmployee(any());
+    }
+
+    @Test
+    void getKeycloakUsersAsAdminReturnsUsers() throws Exception {
+        KeycloakUserDto user = KeycloakUserDto.builder()
+            .id("kc-user-123")
+            .username("testuser")
+            .email("testuser@example.com")
+            .firstName("Test")
+            .lastName("User")
+            .enabled(true)
+            .build();
+
+        when(service.getKeycloakUsers()).thenReturn(List.of(user));
+
+        mvc.perform(get("/api/employees/keycloak-users")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value("kc-user-123"))
+            .andExpect(jsonPath("$[0].username").value("testuser"))
+            .andExpect(jsonPath("$[0].email").value("testuser@example.com"))
+            .andExpect(jsonPath("$[0].enabled").value(true));
+
+        verify(service).getKeycloakUsers();
+    }
+
+    @Test
+    void userCannotListKeycloakUsers() throws Exception {
+        mvc.perform(get("/api/employees/keycloak-users")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER"))))
+            .andExpect(status().isForbidden());
+
+        verify(service, never()).getKeycloakUsers();
+    }
+
+    @Test
+    void anonymousCannotListKeycloakUsers() throws Exception {
+        mvc.perform(get("/api/employees/keycloak-users"))
+            .andExpect(status().isUnauthorized());
+
+        verify(service, never()).getKeycloakUsers();
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.bankapp.hr.service;
 
 import com.bankapp.hr.entity.Employee;
+import com.bankapp.hr.dto.KeycloakUserDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @Service
 public class KeycloakAdminService {
@@ -96,6 +98,57 @@ public class KeycloakAdminService {
                     exception
             );
         }
+    }
+
+
+    /**
+     * Retourne les utilisateurs du realm pour les opérations administratives.
+     * L'appel à l'API Admin Keycloak reste exclusivement côté serveur.
+     */
+    public List<KeycloakUserDto> getUsers() {
+        String token = obtainAdminToken();
+
+        URI usersUri = UriComponentsBuilder
+                .fromHttpUrl(baseUrl)
+                .pathSegment("admin", "realms", realm, "users")
+                .queryParam("max", 1000)
+                .build()
+                .encode()
+                .toUri();
+
+        ResponseEntity<List> response = restTemplate.exchange(
+                usersUri,
+                HttpMethod.GET,
+                new HttpEntity<>(bearerHeaders(token)),
+                List.class
+        );
+
+        List<?> users = response.getBody();
+        if (users == null || users.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return users.stream()
+                .filter(Map.class::isInstance)
+                .map(item -> (Map<?, ?>) item)
+                .filter(user -> user.get("id") instanceof String)
+                .filter(user -> user.get("username") instanceof String)
+                .map(user -> KeycloakUserDto.builder()
+                        .id((String) user.get("id"))
+                        .username((String) user.get("username"))
+                        .email(user.get("email") instanceof String
+                                ? (String) user.get("email") : null)
+                        .firstName(user.get("firstName") instanceof String
+                                ? (String) user.get("firstName") : null)
+                        .lastName(user.get("lastName") instanceof String
+                                ? (String) user.get("lastName") : null)
+                        .enabled(user.get("enabled") instanceof Boolean
+                                ? (Boolean) user.get("enabled") : null)
+                        .build())
+                .sorted(java.util.Comparator.comparing(
+                        KeycloakUserDto::getUsername,
+                        String.CASE_INSENSITIVE_ORDER))
+                .collect(java.util.stream.Collectors.toList());
     }
 
     private String obtainAdminToken() {
