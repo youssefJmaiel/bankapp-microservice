@@ -2414,3 +2414,73 @@ transfers separately to reduce the risk of double counting.
 
 **Technologies:** React, TypeScript, Spring Boot, Spring Cloud Gateway,
 Netflix Eureka, Spring Data JPA, Liquibase, PostgreSQL, Ollama, and Qwen2.5 3B.
+
+---
+
+<!-- BANKAPP_CI_TESTING_DOCUMENTATION -->
+
+## Automated Testing and Quality Assurance
+
+BankApp Microservices uses automated Maven verification to help detect
+regressions and maintain consistency across its Spring Boot services and
+shared domain modules.
+
+### Test Strategy
+
+The project includes automated tests for selected service, controller, and
+business-logic components. Depending on the component, tests can verify:
+
+- Business rules and input validation.
+- Service behavior and repository interactions.
+- REST API behavior and HTTP responses.
+- Error handling and exceptional conditions.
+- Authentication-related behavior where covered by tests.
+
+JUnit 5 and Mockito are used in the test suite. Spring testing utilities
+are also used where appropriate. Test coverage depends on the tests
+implemented for each module; a successful build does not mean every
+possible scenario has been tested.
+
+### Continuous Integration with GitHub Actions
+
+The CI workflow is defined in `.github/workflows/ci.yml`.
+
+The **BankApp Microservices CI** workflow runs on GitHub-hosted Ubuntu
+runners and is triggered by:
+
+- A push to the `main` branch.
+- A pull request targeting `main`.
+- A manual run through GitHub Actions (`workflow_dispatch`).
+
+The workflow:
+
+1. Checks out the repository.
+2. Configures Java 17 using Temurin.
+3. Enables Maven dependency caching.
+4. Verifies Java and Maven versions.
+5. Builds and installs the shared domain modules.
+6. Runs Maven `clean verify` on the platform project.
+7. Attempts to upload available Surefire XML test reports and JaCoCo
+   report files as GitHub Actions artifacts.
+
+Artifacts are configured to be retained for 14 days. Report upload runs
+even if an earlier step fails, so available reports can help with
+troubleshooting. Missing reports generate a warning.
+
+### Running Verification Locally
+
+Run these commands from the repository root to reproduce the main CI steps.
+
+Build and install the shared domain modules:
+
+    ./bankapp-platform/mvnw -B -ntp -f bankapp-domain/pom.xml clean install
+
+Build and verify the platform modules, including configured tests:
+
+    ./bankapp-platform/mvnw -B -ntp -f bankapp-platform/pom.xml clean verify
+
+To run Payment Service tests individually, after installing the shared domain modules:
+
+    ./bankapp-platform/mvnw -f payment-service/pom.xml test
+
+The complete CI sequence is the recommended local verification procedure. Test coverage depends on the tests implemented in each module; a successful build does not guarantee that every scenario is covered.
