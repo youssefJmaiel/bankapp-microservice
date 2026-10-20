@@ -2484,3 +2484,111 @@ To run Payment Service tests individually, after installing the shared domain mo
     ./bankapp-platform/mvnw -f payment-service/pom.xml test
 
 The complete CI sequence is the recommended local verification procedure. Test coverage depends on the tests implemented in each module; a successful build does not guarantee that every scenario is covered.
+
+---
+
+## 🏦 Bank Account & Payment Management
+
+BankApp provides bank account management, internal money transfers, and
+payment operations through dedicated Spring Boot microservices.
+
+### 👑 Administrator Workflow
+
+The administrator manages employee onboarding and the initial setup of
+their banking accounts.
+
+1. **Create an employee:** The administrator creates an employee through
+   the HR module. The employee's platform account is provisioned through
+   Keycloak, which sends an activation email.
+2. **Create a bank account:** The administrator creates a bank account
+   associated with its owner.
+3. **Credit the account:** The administrator can credit an account to
+   initialize or increase its balance.
+4. **Manage employee information:** Employee records can be managed
+   through the HR module.
+
+This workflow connects employee management with the banking features
+provided by the Account microservice.
+
+### 👤 Employee Banking Workflow
+
+After activating their account and signing in, an employee can access
+the banking operations available to their authenticated user account.
+
+- **View bank account information:** Retrieve the employee's own account
+  information through the account API.
+- **Check account balances:** Consult the balance associated with an
+  account.
+- **Transfer money:** Initiate a transfer between supported bank accounts
+  using the source account, the destination account ID or account number,
+  the amount, and the currency.
+- **Review transfer history:** Retrieve the authenticated user's transfer
+  history.
+- **Manage payments:** Submit payment requests and consult payment
+  information associated with the authenticated user.
+
+### 💸 Internal Money Transfers
+
+The Account microservice exposes an API for internal transfers between
+bank accounts.
+
+A typical transfer follows this flow:
+
+1. The employee submits a transfer request.
+2. The backend validates the transfer according to its business rules.
+3. The source account is debited and the destination account is credited.
+4. The transfer is recorded so that it can be retrieved from the transfer
+   history.
+
+For example, transferring `50` from an account with a balance of `1,000`
+to an account with a balance of `0` results in balances of `950` and `50`,
+respectively, when the transfer succeeds. These are illustrative test
+values, not production banking data.
+
+### 💳 Payment Management
+
+The Payment microservice provides REST endpoints to:
+
+- Submit a payment request.
+- Retrieve a payment by its identifier.
+- Retrieve the authenticated user's payments.
+
+Each payment receives a unique reference beginning with `PAY-` and is
+initially recorded with the `PENDING` status. After the Account service
+processes the transfer, the payment is marked `COMPLETED` when the expected
+response is received, or `FAILED` when the Account service returns an HTTP
+error or is unreachable. If the outcome cannot be confirmed from the
+response, the payment may remain `PENDING` for further verification.
+
+Payment operations are handled separately from internal account-to-account
+transfers. The Payment microservice forwards transfer requests to the
+Account microservice and supports destination account IDs or account numbers.
+
+### 🔌 Main REST API Endpoints
+
+The following endpoints are exposed by the relevant backend controllers.
+Requests must comply with the application's authentication and
+authorization rules.
+
+| Service | Method | Endpoint | Purpose |
+|---|---|---|---|
+| HR | `POST` | `/api/employees` | Create an employee |
+| HR | `GET` | `/api/employees` | Retrieve employee records |
+| Account | `POST` | `/api/accounts` | Create a bank account |
+| Account | `POST` | `/api/accounts/{id}/credit` | Credit an account |
+| Account | `GET` | `/api/accounts/my` | Retrieve the authenticated user's account information |
+| Account | `POST` | `/api/accounts/transfers` | Initiate a money transfer |
+| Account | `GET` | `/api/accounts/my/transfers` | Retrieve the user's transfer history |
+| Account | `GET` | `/api/accounts/number/{accountNumber}` | Retrieve an account by account number |
+| Payment | `POST` | `/api/payments` | Submit a payment |
+| Payment | `GET` | `/api/payments/{id}` | Retrieve a payment by ID |
+| Payment | `GET` | `/api/payments/my` | Retrieve the authenticated user's payments |
+
+### 🔐 Security
+
+Banking operations are exposed through the application's secured backend.
+Keycloak provides identity management, OAuth2/JWT protects API access,
+and backend authorization rules control access to protected operations.
+
+The backend is responsible for validating requests and enforcing the
+permissions applicable to each operation.
