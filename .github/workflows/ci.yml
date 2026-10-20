@@ -38,6 +38,14 @@ jobs:
           java -version
           ./bankapp-platform/mvnw -version
 
+      - name: Build and test Eureka discovery server
+        run: >
+          ./discovery-server/mvnw
+          -B
+          -ntp
+          -f discovery-server/pom.xml
+          clean verify
+
       - name: Build and install shared domain modules
         run: >
           ./bankapp-platform/mvnw
