@@ -101,6 +101,29 @@ class PaymentServiceTest {
     }
 
     @Test
+    void createPaymentShouldResolveDestinationIdFromAccountTransferResponse() {
+        CreatePaymentRequest request = validRequest();
+        request.setDestinationAccountId(null);
+        request.setDestinationAccountNumber("TN1234567890123456789012");
+
+        accountServer.expect(requestTo(ACCOUNT_URL + "/api/accounts/transfers"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "\"destinationAccountNumber\":\"TN1234567890123456789012\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("\"destinationAccountId\""))))
+                .andRespond(withSuccess(
+                        "{\"destinationAccountId\":3}", MediaType.APPLICATION_JSON));
+
+        PaymentDto result = paymentService.createPayment(request, OWNER, TOKEN);
+
+        accountServer.verify();
+        assertEquals(3L, result.getDestinationAccountId());
+        assertEquals("COMPLETED", result.getStatus());
+        verify(paymentRepository, times(2)).saveAndFlush(any(Payment.class));
+    }
+
+    @Test
     void createPaymentShouldRetryWhenGeneratedReferenceAlreadyExists() {
         CreatePaymentRequest request = validRequest();
 

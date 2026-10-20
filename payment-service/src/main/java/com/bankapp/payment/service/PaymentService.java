@@ -10,6 +10,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -46,7 +47,8 @@ public class PaymentService {
             String ownerId,
             String accessToken) {
 
-        if (request.getSourceAccountId().equals(request.getDestinationAccountId())) {
+        if (request.getDestinationAccountId() != null
+                && request.getSourceAccountId().equals(request.getDestinationAccountId())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Les comptes source et destinataire doivent être différents");
@@ -75,15 +77,39 @@ public class PaymentService {
 
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("sourceAccountId", request.getSourceAccountId());
-            body.put("destinationAccountId", request.getDestinationAccountId());
+            if (request.getDestinationAccountId() != null) {
+                body.put("destinationAccountId", request.getDestinationAccountId());
+            }
+            if (request.getDestinationAccountNumber() != null
+                    && !request.getDestinationAccountNumber().trim().isEmpty()) {
+                body.put("destinationAccountNumber",
+                        request.getDestinationAccountNumber().trim());
+            }
             body.put("amount", request.getAmount());
             body.put("currency", request.getCurrency());
             body.put("reference", reference);
 
-            restTemplate.postForEntity(
+            ResponseEntity<Map> response = restTemplate.postForEntity(
                     accountServiceUrl + "/api/accounts/transfers",
                     new HttpEntity<Map<String, Object>>(body, headers),
-                    Object.class);
+                    Map.class);
+
+            if (request.getDestinationAccountId() == null) {
+                Map responseBody = response.getBody();
+                Object destinationId = responseBody == null
+                        ? null : responseBody.get("destinationAccountId");
+
+                if (!(destinationId instanceof Number)) {
+                    // Le transfert a peut-être été exécuté : conserver PENDING
+                    // plutôt que déclarer à tort que le transfert a échoué.
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_GATEWAY,
+                            "Account a répondu sans identifiant de destination ; "
+                                    + "le statut du transfert doit être vérifié.");
+                }
+
+                saved.setDestinationAccountId(((Number) destinationId).longValue());
+            }
 
             saved.setStatus("COMPLETED");
             return paymentDtoConverter.convert(paymentRepository.saveAndFlush(saved));

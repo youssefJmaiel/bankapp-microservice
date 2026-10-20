@@ -24,7 +24,7 @@ public class Payment {
     @Column(name = "source_account_id", nullable = false)
     private Long sourceAccountId;
 
-    @Column(name = "destination_account_id", nullable = false)
+    @Column(name = "destination_account_id")
     private Long destinationAccountId;
 
     @Column(name = "owner_id", length = 100, nullable = false)
