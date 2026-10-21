@@ -72,3 +72,131 @@ jobs:
             **/target/site/jacoco/**
           if-no-files-found: warn
           retention-days: 14
+
+  publish-images:
+    name: Build and publish Docker images to GHCR
+    needs: build-and-test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build Eureka discovery server JAR
+        run: >
+          ./discovery-server/mvnw
+          -B
+          -ntp
+          -f discovery-server/pom.xml
+          clean package
+          -DskipTests
+
+      - name: Build and install shared domain modules
+        run: >
+          ./bankapp-platform/mvnw
+          -B
+          -ntp
+          -f bankapp-domain/pom.xml
+          clean install
+          -DskipTests
+
+      - name: Build all platform service JARs
+        run: >
+          ./bankapp-platform/mvnw
+          -B
+          -ntp
+          -f bankapp-platform/pom.xml
+          clean package
+          -DskipTests
+
+      - name: Verify all Docker JAR inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          expected=(
+            "discovery-server/target/discovery-server-0.0.1-SNAPSHOT.jar"
+            "auth-service/target/auth-service-0.0.1-SNAPSHOT.jar"
+            "gateway-service/target/gateway-service-0.0.1-SNAPSHOT.jar"
+            "hr-service/target/hr-service-0.0.1-SNAPSHOT.jar"
+            "mission-service/target/mission-service-0.0.1-SNAPSHOT.jar"
+            "message-router/target/message-router-0.0.1-SNAPSHOT.jar"
+            "partner-service/target/partner-service-0.0.1-SNAPSHOT.jar"
+            "bankapp-notification/target/bankapp-notification-0.0.1-SNAPSHOT.jar"
+            "payment-service/target/payment-service-0.0.1-SNAPSHOT.jar"
+            "account-service/target/account-service-0.0.1-SNAPSHOT.jar"
+            "leave-service/target/leave-service-0.0.1-SNAPSHOT.jar"
+            "ai-service/target/ai-service-0.0.1-SNAPSHOT.jar"
+          )
+
+          for jar in "${expected[@]}"; do
+            if [[ ! -s "$jar" ]]; then
+              echo "::error::JAR absent ou vide : $jar"
+              exit 1
+            fi
+            printf 'OK %s (%s bytes)\n' "$jar" "$(stat -c '%s' "$jar")"
+          done
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish all Java service images
+        shell: bash
+        env:
+          IMAGE_OWNER: ${{ github.repository_owner }}
+          IMAGE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          owner="$(printf '%s' "$IMAGE_OWNER" | tr '[:upper:]' '[:lower:]')"
+          image_tag="sha-${IMAGE_SHA:0:7}"
+
+          services=(
+            "discovery-server:bankapp-discovery-server"
+            "auth-service:bankapp-auth-service"
+            "gateway-service:bankapp-gateway-service"
+            "hr-service:bankapp-hr-service"
+            "mission-service:bankapp-mission-service"
+            "message-router:bankapp-message-router"
+            "partner-service:bankapp-partner-service"
+            "bankapp-notification:bankapp-notification"
+            "payment-service:bankapp-payment-service"
+            "account-service:bankapp-account-service"
+            "leave-service:bankapp-leave-service"
+            "ai-service:bankapp-ai-service"
+          )
+
+          for item in "${services[@]}"; do
+            context="${item%%:*}"
+            image_name="${item#*:}"
+            image="ghcr.io/${owner}/${image_name}"
+
+            echo "========== BUILD ${image} =========="
+
+            docker buildx build \
+              --pull \
+              --push \
+              --tag "${image}:${image_tag}" \
+              --tag "${image}:latest" \
+              "${context}"
+          done
