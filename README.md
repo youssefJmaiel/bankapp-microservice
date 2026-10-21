@@ -2592,3 +2592,57 @@ and backend authorization rules control access to protected operations.
 
 The backend is responsible for validating requests and enforcing the
 permissions applicable to each operation.
+
+
+## Application Health Monitoring with Spring Boot Actuator
+
+### Overview
+
+BankApp uses Spring Boot Actuator to monitor the availability and health
+of its Java microservices. Actuator provides operational HTTP endpoints
+that help developers inspect application status and troubleshoot runtime
+problems.
+
+Health monitoring complements application logs, automated tests, and
+Docker container monitoring.
+
+### Health Endpoints
+
+The main health endpoint is `/actuator/health`.
+For example, the Gateway endpoint is available at:
+
+`http://localhost:8082/actuator/health`
+
+When enabled and running correctly, the endpoint returns a status such as `UP`.
+The `/actuator/info` endpoint provides application information when configured.
+
+### Configuration and Security
+
+Actuator endpoint exposure is configured in each service's
+`application.yaml` file.
+
+Use `management.endpoints.web.exposure.include: health,info`
+to expose only the required endpoints.
+
+Endpoint exposure does not replace Spring Security.
+Sensitive endpoints, such as `/actuator/env`, should not be exposed publicly.
+
+### Docker Healthchecks
+
+Docker Compose can use healthchecks to monitor the status of configured
+containers. A healthcheck periodically tests whether a service is responding.
+
+Typical settings include an interval of 30 seconds, a timeout of 5 seconds,
+three retries, and a startup grace period of 60 seconds.
+
+Check container status with:
+
+`docker compose ps`
+
+### Validation and CI/CD
+
+BankApp uses automated tests and GitHub Actions to validate changes.
+The CI pipeline builds and tests the project before publishing Docker
+images to GitHub Container Registry (GHCR).
+
+These checks help detect problems before deployment.
