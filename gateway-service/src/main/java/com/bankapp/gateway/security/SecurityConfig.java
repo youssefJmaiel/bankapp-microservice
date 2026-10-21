@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeExchange()
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
+                .pathMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .pathMatchers(
                         "/v3/api-docs/**",
                         "/swagger-ui/**",

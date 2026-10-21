@@ -17,6 +17,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
+                .antMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .antMatchers("/auth/token").permitAll() // autoriser ce endpoint
                 .anyRequest().authenticated()          // tout le reste nécessite auth
                 .and()

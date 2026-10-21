@@ -24,6 +24,8 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .authorizeRequests()
+                // Autoriser uniquement le health check Actuator sans authentification
+                .antMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 // Autoriser Swagger/OpenAPI sans auth
                 .antMatchers(
                         "/v3/api-docs/**",

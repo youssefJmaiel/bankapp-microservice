@@ -18,6 +18,11 @@
     <description>Service de gestion des partenaires</description>
 
     <dependencies>
+        <!-- Actuator pour les healthchecks Docker -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
 
         <!-- Partner Domain -->
         <dependency>

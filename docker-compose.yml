@@ -9,6 +9,13 @@ services:
       context: ./discovery-server
       dockerfile: Dockerfile
     container_name: bankapp-discovery
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8761/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
     ports:
       - "8761:8761"
     networks:
@@ -22,6 +29,12 @@ services:
       context: ./auth-service
       dockerfile: Dockerfile
     container_name: bankapp-auth
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8080/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
@@ -40,6 +53,12 @@ services:
       context: ./hr-service
       dockerfile: Dockerfile
     container_name: bankapp-hr
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8083/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     ports:
       - "8083:8083"
     environment:
@@ -74,6 +93,12 @@ services:
       context: ./mission-service
       dockerfile: Dockerfile
     container_name: bankapp-mission
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8084/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     ports:
       - "8084:8084"
     environment:
@@ -112,6 +137,12 @@ services:
       context: ./message-router
       dockerfile: Dockerfile
     container_name: bankapp-message-router
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8085/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     ports:
       - "8085:8085"
     environment:
@@ -145,6 +176,12 @@ services:
       context: ./bankapp-notification
       dockerfile: Dockerfile
     container_name: bankapp-notification
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8086/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
@@ -177,6 +214,12 @@ services:
       context: ./partner-service
       dockerfile: Dockerfile
     container_name: bankapp-partner
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8087/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     ports:
       - "8087:8087"
     environment:
@@ -208,6 +251,12 @@ services:
       context: ./account-service
       dockerfile: Dockerfile
     container_name: bankapp-account
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8089/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     ports:
       - "8089:8089"
     environment:
@@ -237,6 +286,12 @@ services:
       context: ./payment-service
       dockerfile: Dockerfile
     container_name: bankapp-payment
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8088/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     ports:
       - "8088:8088"
     environment:
@@ -263,6 +318,12 @@ services:
       context: ./leave-service
       dockerfile: Dockerfile
     container_name: bankapp-leave
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8090/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     ports:
       - "8090:8090"
     environment:
@@ -293,6 +354,12 @@ services:
       context: ./ai-service
       dockerfile: Dockerfile
     container_name: bankapp-ai
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8091/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     ports:
       - "8091:8091"
     environment:
@@ -326,6 +393,12 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: bankapp-ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     volumes:
       - ollama_data:/root/.ollama
     networks:
@@ -336,6 +409,12 @@ services:
       context: ./gateway-service
       dockerfile: Dockerfile
     container_name: bankapp-gateway
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8082/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     ports:
       - "8082:8082"
     environment:
@@ -359,6 +438,12 @@ services:
   ibm-mq:
     image: ibmcom/mq:latest
     container_name: bankapp-ibm-mq
+    healthcheck:
+      test: ["CMD-SHELL", "dspmq -m QM1 -o status 2>/dev/null | grep -q 'STATUS(Running)'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     ports:
       - "1414:1414"
       - "9443:9443"
