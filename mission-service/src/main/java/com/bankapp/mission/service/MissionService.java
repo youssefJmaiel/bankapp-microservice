@@ -104,7 +104,7 @@ public class MissionService {
                         .recipientEmail(employee.getEmail())
                         .recipientFirstName(
                                 employee.getFirstName() == null || employee.getFirstName().isBlank()
-                                        ? "collègue" : employee.getFirstName())
+                                        ? "colleague" : employee.getFirstName())
                         .build();
 
                 missionEventPublisher.publishMissionAssigned(event);
@@ -115,7 +115,7 @@ public class MissionService {
             Map<String, Object> variables = new HashMap<>();
             variables.put("firstName",
                     employee.getFirstName() == null || employee.getFirstName().isBlank()
-                            ? "collègue" : employee.getFirstName());
+                            ? "colleague" : employee.getFirstName());
             variables.put("missionTitle", mission.getTitle() == null ? "" : mission.getTitle());
             variables.put("missionDescription",
                     mission.getDescription() == null ? "" : mission.getDescription());
@@ -126,9 +126,9 @@ public class MissionService {
 
             MailRequest request = MailRequest.builder()
                     .to(employee.getEmail())
-                    .subject("Nouvelle mission assignée : " + mission.getTitle())
+                    .subject("New mission assigned: " + mission.getTitle())
                     .template("mission-assigned")
-                    .locale("fr")
+                    .locale("en")
                     .variables(variables)
                     .build();
 

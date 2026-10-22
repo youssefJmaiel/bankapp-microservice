@@ -41,7 +41,7 @@ public class MissionAssignedListener {
 
         MailRequest request = MailRequest.builder()
                 .to(event.getRecipientEmail())
-                .subject("Nouvelle mission assignée : " + event.getMissionTitle())
+                .subject("New mission assigned: " + event.getMissionTitle())
                 .template("mission-assigned")
                 .variables(variables)
                 .build();

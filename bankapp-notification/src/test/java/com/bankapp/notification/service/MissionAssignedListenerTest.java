@@ -51,7 +51,7 @@ class MissionAssignedListenerTest {
 
         MailRequest request = captor.getValue();
         assertEquals("employee@example.com", request.getTo());
-        assertEquals("Nouvelle mission assignée : Migration bancaire", request.getSubject());
+        assertEquals("New mission assigned: Migration bancaire", request.getSubject());
         assertEquals("mission-assigned", request.getTemplate());
         assertNotNull(request.getVariables());
         assertEquals("Youssef", request.getVariables().get("firstName"));

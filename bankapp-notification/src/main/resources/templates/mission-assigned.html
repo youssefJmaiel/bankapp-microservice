@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nouvelle mission - BankApp</title>
+    <title>New Mission - BankApp</title>
 </head>
 <body style="margin:0; padding:0; background-color:#f3f5f9; font-family:Arial,Helvetica,sans-serif; color:#263445;">
 
@@ -15,7 +15,7 @@
             <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0"
                    style="width:100%; max-width:600px; background-color:#ffffff; border-radius:12px; overflow:hidden;">
 
-                <!-- En-tête -->
+                <!-- Header -->
                 <tr>
                     <td align="center"
                         style="background-color:#17365d; padding:30px 24px;">
@@ -23,37 +23,37 @@
                             BankApp
                         </h1>
                         <p style="margin:9px 0 0; color:#dce7f5; font-size:14px;">
-                            Notification de mission
+                            Mission Notification
                         </p>
                     </td>
                 </tr>
 
-                <!-- Contenu -->
+                <!-- Content -->
                 <tr>
                     <td style="padding:32px 28px;">
 
                         <p style="margin:0 0 18px; font-size:16px; line-height:1.6;">
-                            Bonjour <strong th:text="${firstName}">Prénom</strong>,
+                            Hello <strong th:text="${firstName}">First name</strong>,
                         </p>
 
                         <p style="margin:0 0 24px; color:#526174; font-size:15px; line-height:1.7;">
-                            Une nouvelle mission vient de vous être attribuée.
-                            Retrouvez ci-dessous les informations essentielles.
+                            A new mission has just been assigned to you.
+                            Please find the key details below.
                         </p>
 
-                        <!-- Carte mission -->
+                        <!-- Mission card -->
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
                                style="background-color:#f7f9fc; border:1px solid #e1e8f0; border-radius:8px;">
                             <tr>
                                 <td style="padding:24px;">
 
                                     <p style="margin:0 0 8px; color:#61748a; font-size:12px; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">
-                                        Mission attribuée
+                                        Assigned Mission
                                     </p>
 
                                     <h2 style="margin:0 0 22px; color:#17365d; font-size:22px; line-height:1.4;"
                                         th:text="${missionTitle}">
-                                        Titre de la mission
+                                        Mission title
                                     </h2>
 
                                     <p style="margin:0 0 8px; color:#263445; font-size:14px; font-weight:bold;">
@@ -62,27 +62,27 @@
 
                                     <p style="margin:0 0 24px; color:#526174; font-size:14px; line-height:1.7; white-space:pre-line;"
                                        th:text="${missionDescription}">
-                                        Description de la mission
+                                        Mission description
                                     </p>
 
                                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                                         <tr>
                                             <td width="50%" valign="top" style="padding:14px 10px 0 0; border-top:1px solid #dfe6ee;">
                                                 <p style="margin:0 0 7px; color:#61748a; font-size:12px;">
-                                                    DATE DE DÉBUT
+                                                    START DATE
                                                 </p>
                                                 <p style="margin:0; color:#17365d; font-size:15px; font-weight:bold;"
-                                                   th:text="${startDate != null ? #temporals.format(startDate, 'dd/MM/yyyy') : 'Non précisée'}">
+                                                   th:text="${startDate != null ? #temporals.format(startDate, 'dd/MM/yyyy') : 'Not specified'}">
                                                     11/10/2026
                                                 </p>
                                             </td>
 
                                             <td width="50%" valign="top" style="padding:14px 0 0 10px; border-top:1px solid #dfe6ee;">
                                                 <p style="margin:0 0 7px; color:#61748a; font-size:12px;">
-                                                    DATE DE FIN
+                                                    END DATE
                                                 </p>
                                                 <p style="margin:0; color:#17365d; font-size:15px; font-weight:bold;"
-                                                   th:text="${endDate != null ? #temporals.format(endDate, 'dd/MM/yyyy') : 'Non précisée'}">
+                                                   th:text="${endDate != null ? #temporals.format(endDate, 'dd/MM/yyyy') : 'Not specified'}">
                                                     26/10/2026
                                                 </p>
                                             </td>
@@ -94,23 +94,23 @@
                         </table>
 
                         <p style="margin:26px 0 0; color:#526174; font-size:14px; line-height:1.7;">
-                            Connectez-vous à BankApp pour consulter les détails de cette mission.
+                            Log in to BankApp to view the details of this mission.
                         </p>
 
                         <p style="margin:28px 0 0; color:#526174; font-size:14px; line-height:1.8;">
-                            Cordialement,<br>
-                            <strong style="color:#17365d;">L'équipe BankApp</strong>
+                            Best regards,<br>
+                            <strong style="color:#17365d;">The BankApp Team</strong>
                         </p>
 
                     </td>
                 </tr>
 
-                <!-- Pied de page -->
+                <!-- Footer -->
                 <tr>
                     <td align="center"
                         style="padding:18px 24px; background-color:#f7f9fc; border-top:1px solid #e8edf3;">
                         <p style="margin:0; color:#8491a2; font-size:12px; line-height:1.6;">
-                            Ce message a été envoyé automatiquement par BankApp.
+                            This message was sent automatically by BankApp.
                         </p>
                     </td>
                 </tr>
