@@ -104,7 +104,7 @@ class PaymentServiceTest {
     void createPaymentShouldResolveDestinationIdFromAccountTransferResponse() {
         CreatePaymentRequest request = validRequest();
         request.setDestinationAccountId(null);
-        request.setDestinationAccountNumber("TN1234567890123456789012");
+        request.setDestinationAccountNumber("  TN1234567890123456789012  ");
 
         accountServer.expect(requestTo(ACCOUNT_URL + "/api/accounts/transfers"))
                 .andExpect(method(HttpMethod.POST))
@@ -121,6 +121,30 @@ class PaymentServiceTest {
         assertEquals(3L, result.getDestinationAccountId());
         assertEquals("COMPLETED", result.getStatus());
         verify(paymentRepository, times(2)).saveAndFlush(any(Payment.class));
+    }
+
+    @Test
+    void createPaymentShouldRemainPendingWhenAccountResponseOmitsDestinationId() {
+        CreatePaymentRequest request = validRequest();
+        request.setDestinationAccountId(null);
+        request.setDestinationAccountNumber("TN1234567890123456789012");
+
+        accountServer.expect(requestTo(ACCOUNT_URL + "/api/accounts/transfers"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> paymentService.createPayment(request, OWNER, TOKEN));
+
+        accountServer.verify();
+        assertEquals(HttpStatus.BAD_GATEWAY, exception.getStatus());
+
+        verify(paymentRepository, times(1)).saveAndFlush(any(Payment.class));
+        verify(paymentRepository).saveAndFlush(argThat(payment ->
+                "PENDING".equals(payment.getStatus())
+                        && payment.getDestinationAccountId() == null));
+        verify(paymentDtoConverter, never()).convert(any(Payment.class));
     }
 
     @Test
@@ -170,6 +194,8 @@ class PaymentServiceTest {
         assertTrue(exception.getReason().contains("HTTP 403"));
 
         verify(paymentRepository, times(2)).saveAndFlush(any(Payment.class));
+        verify(paymentRepository, times(2)).saveAndFlush(argThat(
+                payment -> "FAILED".equals(payment.getStatus())));
         verify(paymentDtoConverter, never()).convert(any(Payment.class));
     }
 
@@ -190,6 +216,8 @@ class PaymentServiceTest {
         assertEquals("Le service Account est injoignable.", exception.getReason());
 
         verify(paymentRepository, times(2)).saveAndFlush(any(Payment.class));
+        verify(paymentRepository, times(2)).saveAndFlush(argThat(
+                payment -> "FAILED".equals(payment.getStatus())));
         verify(paymentDtoConverter, never()).convert(any(Payment.class));
     }
 

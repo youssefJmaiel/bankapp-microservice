@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.MediaType;
 
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -46,6 +47,115 @@ class PaymentSecurityTest {
                 () -> mockMvc.perform(get("/api/payments/my")
                         .header("Authorization", "Bearer invalid-token"))
         );
+
+        verifyNoInteractions(paymentService);
+    }
+
+
+    @Test
+    void shouldRejectPaymentWhenSourceAccountIsMissing() throws Exception {
+        assertInvalidPayment("""
+                {
+                  "destinationAccountId": 2,
+                  "amount": 10.00,
+                  "currency": "TND"
+                }
+                """);
+    }
+
+    @Test
+    void shouldRejectPaymentWhenSourceAccountIdIsNegative() throws Exception {
+        assertInvalidPayment("""
+                {
+                  "sourceAccountId": -1,
+                  "destinationAccountId": 2,
+                  "amount": 10.00,
+                  "currency": "TND"
+                }
+                """);
+    }
+
+    @Test
+    void shouldRejectPaymentWhenDestinationIsMissing() throws Exception {
+        assertInvalidPayment("""
+                {
+                  "sourceAccountId": 1,
+                  "amount": 10.00,
+                  "currency": "TND"
+                }
+                """);
+    }
+
+    @Test
+    void shouldRejectPaymentWhenAmountIsZero() throws Exception {
+        assertInvalidPayment("""
+                {
+                  "sourceAccountId": 1,
+                  "destinationAccountId": 2,
+                  "amount": 0,
+                  "currency": "TND"
+                }
+                """);
+    }
+
+    @Test
+    void shouldRejectPaymentWhenAmountIsNegative() throws Exception {
+        assertInvalidPayment("""
+                {
+                  "sourceAccountId": 1,
+                  "destinationAccountId": 2,
+                  "amount": -10.00,
+                  "currency": "TND"
+                }
+                """);
+    }
+
+    @Test
+    void shouldRejectPaymentWhenAmountHasMoreThanTwoDecimalPlaces() throws Exception {
+        assertInvalidPayment("""
+                {
+                  "sourceAccountId": 1,
+                  "destinationAccountId": 2,
+                  "amount": 10.123,
+                  "currency": "TND"
+                }
+                """);
+    }
+
+    @Test
+    void shouldRejectPaymentWhenCurrencyIsNotThreeUppercaseLetters() throws Exception {
+        assertInvalidPayment("""
+                {
+                  "sourceAccountId": 1,
+                  "destinationAccountId": 2,
+                  "amount": 10.00,
+                  "currency": "tn"
+                }
+                """);
+    }
+
+    @Test
+    void shouldRejectPaymentWhenDestinationAccountNumberIsMalformed() throws Exception {
+        assertInvalidPayment("""
+                {
+                  "sourceAccountId": 1,
+                  "destinationAccountNumber": "12345",
+                  "amount": 10.00,
+                  "currency": "TND"
+                }
+                """);
+    }
+
+    private void assertInvalidPayment(String json) throws Exception {
+        mockMvc.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                .post("/api/payments")
+                                .with(jwt().jwt(token -> token
+                                        .subject("subject-123")
+                                        .claim("preferred_username", "alice")))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                .andExpect(status().isBadRequest());
 
         verifyNoInteractions(paymentService);
     }

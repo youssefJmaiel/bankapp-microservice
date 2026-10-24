@@ -12,6 +12,13 @@ import com.bankapp.mission.messaging.MissionEventPublisher;
 import com.bankapp.mission.repository.MissionRepository;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.test.util.ReflectionTestUtils;
+import com.bankapp.notification.dto.MailRequest;
+import com.bankapp.mission.dto.MissionAssignedEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -200,4 +207,155 @@ class MissionServiceTest {
         assertSame(employee, result);
         verify(hrClient).getEmployeeById(42L);
     }
+
+
+    @AfterEach
+    void cleanTransactionSynchronization() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
+        TransactionSynchronizationManager.setActualTransactionActive(false);
+    }
+
+    private void beginTransactionSynchronization() {
+        TransactionSynchronizationManager.setActualTransactionActive(true);
+        TransactionSynchronizationManager.initSynchronization();
+    }
+
+    private void executeAfterCommitCallbacks() {
+        for (TransactionSynchronization synchronization :
+                TransactionSynchronizationManager.getSynchronizations()) {
+            synchronization.afterCommit();
+        }
+    }
+
+    @Test
+    void mqNotificationIsPublishedOnlyAfterCommit() {
+        ReflectionTestUtils.setField(missionService, "mqNotificationsEnabled", true);
+
+        EmployeeDto employee = EmployeeDto.builder()
+                .id(42L)
+                .firstName("Youssef")
+                .email("employee@example.com")
+                .build();
+        when(hrClient.getEmployeeById(42L)).thenReturn(employee);
+        when(missionRepository.save(any(Mission.class))).thenAnswer(invocation -> {
+            Mission saved = invocation.getArgument(0);
+            saved.setId(10L);
+            return saved;
+        });
+
+        beginTransactionSynchronization();
+        MissionDto result = missionService.createMission(request());
+
+        assertEquals(10L, result.getId());
+        verifyNoInteractions(missionEventPublisher, notificationClient);
+
+        executeAfterCommitCallbacks();
+
+        ArgumentCaptor<MissionAssignedEvent> captor =
+                ArgumentCaptor.forClass(MissionAssignedEvent.class);
+        verify(missionEventPublisher).publishMissionAssigned(captor.capture());
+        MissionAssignedEvent event = captor.getValue();
+
+        assertEquals(10L, event.getMissionId());
+        assertEquals("Migration bancaire", event.getMissionTitle());
+        assertEquals(42L, event.getAssignedEmployeeId());
+        assertEquals("employee@example.com", event.getRecipientEmail());
+        assertEquals("Youssef", event.getRecipientFirstName());
+        assertNotNull(event.getEventId());
+        verifyNoInteractions(notificationClient);
+    }
+
+    @Test
+    void directNotificationIsSentAfterCommitWhenMqIsDisabled() {
+        ReflectionTestUtils.setField(missionService, "mqNotificationsEnabled", false);
+
+        EmployeeDto employee = EmployeeDto.builder()
+                .id(42L)
+                .firstName("Youssef")
+                .email("employee@example.com")
+                .build();
+        when(hrClient.getEmployeeById(42L)).thenReturn(employee);
+        when(missionRepository.save(any(Mission.class))).thenAnswer(invocation -> {
+            Mission saved = invocation.getArgument(0);
+            saved.setId(11L);
+            return saved;
+        });
+
+        beginTransactionSynchronization();
+        missionService.createMission(request());
+
+        verifyNoInteractions(missionEventPublisher, notificationClient);
+        executeAfterCommitCallbacks();
+
+        ArgumentCaptor<MailRequest> captor =
+                ArgumentCaptor.forClass(MailRequest.class);
+        verify(notificationClient).sendNotification(captor.capture());
+
+        MailRequest mail = captor.getValue();
+        assertEquals("employee@example.com", mail.getTo());
+        assertEquals("New mission assigned: Migration bancaire", mail.getSubject());
+        assertEquals("mission-assigned", mail.getTemplate());
+        assertEquals("Youssef", mail.getVariables().get("firstName"));
+        verifyNoInteractions(missionEventPublisher);
+    }
+
+    @Test
+    void missingEmployeeEmailDoesNotSendNotification() {
+        ReflectionTestUtils.setField(missionService, "mqNotificationsEnabled", true);
+
+        EmployeeDto employee = EmployeeDto.builder()
+                .id(42L)
+                .firstName("Youssef")
+                .email("   ")
+                .build();
+        when(hrClient.getEmployeeById(42L)).thenReturn(employee);
+        when(missionRepository.save(any(Mission.class))).thenAnswer(invocation -> {
+            Mission saved = invocation.getArgument(0);
+            saved.setId(12L);
+            return saved;
+        });
+
+        beginTransactionSynchronization();
+        MissionDto result = missionService.createMission(request());
+
+        assertEquals(12L, result.getId());
+        executeAfterCommitCallbacks();
+
+        verify(missionRepository).save(any(Mission.class));
+        verifyNoInteractions(missionEventPublisher, notificationClient);
+    }
+
+    @Test
+    void publisherFailureDoesNotUndoSavedMission() {
+        ReflectionTestUtils.setField(missionService, "mqNotificationsEnabled", true);
+
+        EmployeeDto employee = EmployeeDto.builder()
+                .id(42L)
+                .firstName("Youssef")
+                .email("employee@example.com")
+                .build();
+        when(hrClient.getEmployeeById(42L)).thenReturn(employee);
+        when(missionRepository.save(any(Mission.class))).thenAnswer(invocation -> {
+            Mission saved = invocation.getArgument(0);
+            saved.setId(13L);
+            return saved;
+        });
+        doThrow(new IllegalStateException("MQ indisponible"))
+                .when(missionEventPublisher)
+                .publishMissionAssigned(any(MissionAssignedEvent.class));
+
+        beginTransactionSynchronization();
+        MissionDto result = missionService.createMission(request());
+
+        assertEquals(13L, result.getId());
+        executeAfterCommitCallbacks();
+
+        verify(missionRepository).save(any(Mission.class));
+        verify(missionEventPublisher).publishMissionAssigned(
+                any(MissionAssignedEvent.class));
+        verifyNoInteractions(notificationClient);
+    }
+
 }

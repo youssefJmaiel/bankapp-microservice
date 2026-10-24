@@ -145,7 +145,7 @@ class AccountTransferServiceTest {
 
     @Test
     void transferShouldRejectInactiveAccount() {
-        Account source = account(2L, "user-123", "TND", "100.00", "SUSPENDED");
+        Account source = account(2L, "user-123", "TND", "100.00", "BLOCKED");
         Account destination = account(1L, "user-456", "TND", "40.00", "ACTIVE");
         stubAccounts(source, destination);
         when(transferRepository.findByReference("REF-123"))
@@ -399,7 +399,7 @@ class AccountTransferServiceTest {
     @Test
     void transferShouldRejectInactiveDestinationAccount() {
         Account source = account(2L, "user-123", "TND", "100.00", "ACTIVE");
-        Account destination = account(1L, "user-456", "TND", "40.00", "INACTIVE");
+        Account destination = account(1L, "user-456", "TND", "40.00", "BLOCKED");
         stubAccounts(source, destination);
         when(transferRepository.findByReference("REF-123"))
                 .thenReturn(Optional.empty());
@@ -409,6 +409,38 @@ class AccountTransferServiceTest {
                 () -> transferService.transfer(request, "user-123", "youssef"));
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(transferRepository, never()).saveAndFlush(any(AccountTransfer.class));
+    }
+
+    @Test
+    void transferShouldReturnNotFoundWhenSourceAccountDoesNotExist() {
+        when(accountRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(account(
+                        1L, "user-456", "TND", "40.00", "ACTIVE")));
+        when(accountRepository.findByIdForUpdate(2L))
+                .thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> transferService.transfer(request, "user-123", "youssef"));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(transferRepository, never()).saveAndFlush(any(AccountTransfer.class));
+    }
+
+    @Test
+    void transferShouldReturnNotFoundWhenDestinationAccountDoesNotExist() {
+        when(accountRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> transferService.transfer(request, "user-123", "youssef"));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        verify(accountRepository).findByIdForUpdate(1L);
         verify(accountRepository, never()).save(any(Account.class));
         verify(transferRepository, never()).saveAndFlush(any(AccountTransfer.class));
     }

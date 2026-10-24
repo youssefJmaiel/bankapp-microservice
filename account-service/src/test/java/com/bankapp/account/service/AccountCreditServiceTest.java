@@ -142,7 +142,7 @@ class AccountCreditServiceTest {
 
     @Test
     void creditShouldRejectInactiveAccount() {
-        Account account = account(1L, "100.00", "TND", "SUSPENDED");
+        Account account = account(1L, "100.00", "TND", "BLOCKED");
         when(accountRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(account));
         when(creditRepository.findByReference("CREDIT_123")).thenReturn(Optional.empty());
 
@@ -210,6 +210,39 @@ class AccountCreditServiceTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         verifyNoInteractions(accountRepository, creditRepository);
+    }
+
+    @Test
+    void creditShouldRejectNullAmountBeforeAccessingRepositories() {
+        request.setAmount(null);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> creditService.credit(1L, request));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        verifyNoInteractions(accountRepository, creditRepository);
+    }
+
+    @Test
+    void creditShouldRejectReferenceReusedForDifferentAccount() {
+        Account account = account(2L, "100.00", "TND", "ACTIVE");
+        AccountCredit previous = existingCredit(
+                1L, "50.00", "TND", "CREDIT_123", "150.00");
+
+        when(accountRepository.findByIdForUpdate(2L))
+                .thenReturn(Optional.of(account));
+        when(creditRepository.findByReference("CREDIT_123"))
+                .thenReturn(Optional.of(previous));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> creditService.credit(2L, request));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+        assertEquals(new BigDecimal("100.00"), account.getBalance());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(creditRepository, never()).saveAndFlush(any(AccountCredit.class));
     }
 
     @Test
