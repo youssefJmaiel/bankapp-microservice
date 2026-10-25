@@ -8,6 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -22,14 +26,24 @@ public class MissionController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<List<MissionDto>> getAllMissions() {
-        return ResponseEntity.ok(missionService.getAllMissions());
+    public ResponseEntity<List<MissionDto>> getAllMissions(
+            Authentication authentication,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(
+                missionService.getMissionsForUser(currentUsername(jwt), isAdmin(authentication))
+        );
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<MissionDto> getMissionById(@PathVariable Long id) {
-        return ResponseEntity.ok(missionService.getMissionById(id));
+    public ResponseEntity<MissionDto> getMissionById(
+            @PathVariable Long id,
+            Authentication authentication,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(
+                missionService.getMissionByIdForUser(
+                        id, currentUsername(jwt), isAdmin(authentication))
+        );
     }
 
     @PostMapping
@@ -63,9 +77,12 @@ public class MissionController {
     @GetMapping("/{id}/employee")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<EmployeeDto> getAssignedEmployee(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            Authentication authentication,
+            @AuthenticationPrincipal Jwt jwt) {
 
-        MissionDto mission = missionService.getMissionById(id);
+        MissionDto mission = missionService.getMissionByIdForUser(
+                id, currentUsername(jwt), isAdmin(authentication));
 
         EmployeeDto employee =
                 missionService.getAssignedEmployee(
@@ -73,5 +90,25 @@ public class MissionController {
                 );
 
         return ResponseEntity.ok(employee);
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        return authentication != null
+                && authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ROLE_ADMIN"::equals);
+    }
+
+    private String currentUsername(Jwt jwt) {
+        if (jwt == null) {
+            return null;
+        }
+
+        String username = jwt.getClaimAsString("preferred_username");
+        if (username == null || username.isBlank()) {
+            username = jwt.getClaimAsString("email");
+        }
+
+        return username;
     }
 }

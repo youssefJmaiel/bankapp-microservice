@@ -358,4 +358,95 @@ class MissionServiceTest {
         verifyNoInteractions(notificationClient);
     }
 
+
+
+    @Test
+    void getMissionsForUserReturnsOnlyAssignedEmployeeMissions() {
+        EmployeeDto employee = EmployeeDto.builder()
+                .id(42L)
+                .email("user@example.com")
+                .build();
+
+        Mission assigned = mission(1L);
+        assigned.setAssignedEmployeeId(42L);
+
+        when(hrClient.getAllEmployees()).thenReturn(List.of(employee));
+        when(missionRepository.findByAssignedEmployeeId(42L))
+                .thenReturn(List.of(assigned));
+
+        List<MissionDto> result =
+                missionService.getMissionsForUser("user@example.com", false);
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getId());
+        assertEquals(42L, result.get(0).getAssignedEmployeeId());
+
+        verify(hrClient).getAllEmployees();
+        verify(missionRepository).findByAssignedEmployeeId(42L);
+        verify(missionRepository, never()).findAll();
+    }
+
+    @Test
+    void getMissionByIdForUserDeniesMissionAssignedToAnotherEmployee() {
+        EmployeeDto employee = EmployeeDto.builder()
+                .id(42L)
+                .email("user@example.com")
+                .build();
+
+        Mission otherEmployeeMission = mission(1L);
+        otherEmployeeMission.setAssignedEmployeeId(99L);
+
+        when(missionRepository.findById(1L))
+                .thenReturn(Optional.of(otherEmployeeMission));
+        when(hrClient.getAllEmployees()).thenReturn(List.of(employee));
+
+        assertThrows(
+                org.springframework.security.access.AccessDeniedException.class,
+                () -> missionService.getMissionByIdForUser(
+                        1L, "user@example.com", false)
+        );
+
+        verify(missionRepository).findById(1L);
+    }
+
+    @Test
+    void getMissionsForUnknownUserReturnsEmptyList() {
+        when(hrClient.getAllEmployees()).thenReturn(List.of());
+
+        List<MissionDto> result =
+                missionService.getMissionsForUser("unknown@example.com", false);
+
+        assertTrue(result.isEmpty());
+        verify(missionRepository, never()).findAll();
+        verify(missionRepository, never()).findByAssignedEmployeeId(any());
+    }
+
+    @Test
+    void getMissionByIdForUnknownUserDeniesAccess() {
+        Mission existing = mission(1L);
+
+        when(missionRepository.findById(1L))
+                .thenReturn(Optional.of(existing));
+        when(hrClient.getAllEmployees()).thenReturn(List.of());
+
+        assertThrows(
+                org.springframework.security.access.AccessDeniedException.class,
+                () -> missionService.getMissionByIdForUser(
+                        1L, "unknown@example.com", false)
+        );
+    }
+
+    @Test
+    void adminGetsAllMissionsWithoutResolvingEmployee() {
+        when(missionRepository.findAll())
+                .thenReturn(List.of(mission(1L), mission(2L)));
+
+        List<MissionDto> result =
+                missionService.getMissionsForUser("admin@example.com", true);
+
+        assertEquals(2, result.size());
+        verify(missionRepository).findAll();
+        verifyNoInteractions(hrClient);
+    }
+
 }

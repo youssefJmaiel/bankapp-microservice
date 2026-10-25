@@ -12,6 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -86,26 +89,52 @@ class MissionControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
-    void userCanReadMissions() throws Exception {
-        when(missionService.getAllMissions())
+    void userCanReadOnlyTheirMissions() throws Exception {
+        when(missionService.getMissionsForUser("test@example.com", false))
                 .thenReturn(List.of(missionDto(1L)));
 
-        mockMvc.perform(get("/api/missions"))
+        mockMvc.perform(get("/api/missions")
+                        .with(jwt().jwt(token -> token
+                                .claim("preferred_username", "test@example.com"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].title").value("Migration bancaire"));
+
+        verify(missionService).getMissionsForUser("test@example.com", false);
     }
 
     @Test
-    @WithMockUser(roles = "USER")
-    void userCanReadMissionById() throws Exception {
-        when(missionService.getMissionById(1L)).thenReturn(missionDto(1L));
+    void userCanReadTheirMissionById() throws Exception {
+        when(missionService.getMissionByIdForUser(1L, "test@example.com", false))
+                .thenReturn(missionDto(1L));
 
-        mockMvc.perform(get("/api/missions/1"))
+        mockMvc.perform(get("/api/missions/1")
+                        .with(jwt().jwt(token -> token
+                                .claim("preferred_username", "test@example.com"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.title").value("Migration bancaire"));
+
+        verify(missionService).getMissionByIdForUser(1L, "test@example.com", false);
+    }
+
+    @Test
+    void userCannotReadAnotherEmployeesMission() throws Exception {
+        when(missionService.getMissionByIdForUser(
+                1L, "user@example.com", false))
+                .thenThrow(new AccessDeniedException(
+                        "Accès interdit à cette mission."));
+
+        mockMvc.perform(get("/api/missions/1")
+                        .with(jwt().jwt(token -> token
+                                .claim("preferred_username", "user@example.com"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER"))))
+                .andExpect(status().isForbidden());
+
+        verify(missionService).getMissionByIdForUser(
+                1L, "user@example.com", false);
     }
 
     @Test
@@ -202,8 +231,7 @@ class MissionControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
-    void userCanReadAssignedEmployee() throws Exception {
+    void userCanReadEmployeeAssignedToTheirMission() throws Exception {
         EmployeeDto employee = EmployeeDto.builder()
                 .id(10L)
                 .firstName("Test")
@@ -211,14 +239,19 @@ class MissionControllerTest {
                 .email("test@example.com")
                 .build();
 
-        when(missionService.getMissionById(1L)).thenReturn(missionDto(1L));
+        when(missionService.getMissionByIdForUser(1L, "test@example.com", false))
+                .thenReturn(missionDto(1L));
         when(missionService.getAssignedEmployee(10L)).thenReturn(employee);
 
-        mockMvc.perform(get("/api/missions/1/employee"))
+        mockMvc.perform(get("/api/missions/1/employee")
+                        .with(jwt().jwt(token -> token
+                                .claim("preferred_username", "test@example.com"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(10))
                 .andExpect(jsonPath("$.firstName").value("Test"));
 
+        verify(missionService).getMissionByIdForUser(1L, "test@example.com", false);
         verify(missionService).getAssignedEmployee(10L);
     }
 }

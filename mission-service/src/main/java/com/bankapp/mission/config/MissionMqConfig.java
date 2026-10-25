@@ -39,6 +39,7 @@ public class MissionMqConfig {
         factory.setQueueManager(queueManager);
         factory.setChannel(channel);
         factory.setTransportType(WMQConstants.WMQ_CM_CLIENT);
+        factory.setBooleanProperty(WMQConstants.USER_AUTHENTICATION_MQCSP, true);
         factory.setStringProperty(WMQConstants.USERID, user);
         factory.setStringProperty(WMQConstants.PASSWORD, password);
         return factory;

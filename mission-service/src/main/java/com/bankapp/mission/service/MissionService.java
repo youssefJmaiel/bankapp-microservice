@@ -14,6 +14,7 @@ import com.bankapp.hr.dto.EmployeeDto;
 import com.bankapp.mission.repository.MissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.transaction.Transactional;
@@ -52,6 +53,61 @@ public class MissionService {
                 .stream()
                 .map(missionDtoConverter::convert)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Liste toutes les missions pour un administrateur, ou uniquement celles
+     * affectées à l'employé correspondant à l'identité Keycloak.
+     */
+    public List<MissionDto> getMissionsForUser(String username, boolean admin) {
+        if (admin) {
+            return getAllMissions();
+        }
+
+        Long employeeId = resolveEmployeeId(username);
+        if (employeeId == null) {
+            return java.util.Collections.emptyList();
+        }
+
+        return missionRepository.findByAssignedEmployeeId(employeeId)
+                .stream()
+                .map(missionDtoConverter::convert)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Empêche un utilisateur de consulter une mission affectée à un autre
+     * employé, même s'il connaît son identifiant.
+     */
+    public MissionDto getMissionByIdForUser(Long id, String username, boolean admin) {
+        MissionDto mission = getMissionById(id);
+
+        if (admin) {
+            return mission;
+        }
+
+        Long employeeId = resolveEmployeeId(username);
+        if (employeeId == null
+                || !employeeId.equals(mission.getAssignedEmployeeId())) {
+            throw new AccessDeniedException("Accès interdit à cette mission.");
+        }
+
+        return mission;
+    }
+
+    private Long resolveEmployeeId(String username) {
+        if (username == null || username.isBlank()) {
+            return null;
+        }
+
+        return hrClient.getAllEmployees()
+                .stream()
+                .filter(employee -> employee.getEmail() != null)
+                .filter(employee -> employee.getEmail().equalsIgnoreCase(username))
+                .map(EmployeeDto::getId)
+                .filter(java.util.Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     public MissionDto getMissionById(Long id) {

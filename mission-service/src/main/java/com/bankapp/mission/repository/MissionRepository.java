@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MissionRepository extends JpaRepository<Mission, Long> {
+
+    java.util.List<Mission> findByAssignedEmployeeId(Long assignedEmployeeId);
 }
