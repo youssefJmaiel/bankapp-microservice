@@ -158,6 +158,7 @@ services:
       SPRING_LIQUIBASE_ENABLED: "true"
       SPRING_LIQUIBASE_DEFAULT_SCHEMA: message_schema
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      HR_SERVICE_BASE_URL: http://hr-service:8083
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
     extra_hosts:

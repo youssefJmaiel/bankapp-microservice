@@ -106,8 +106,10 @@ public class KeycloakAdminService {
      * L'appel à l'API Admin Keycloak reste exclusivement côté serveur.
      */
     public List<KeycloakUserDto> getUsers() {
-        String token = obtainAdminToken();
+        return getUsers(obtainAdminToken());
+    }
 
+    private List<KeycloakUserDto> getUsers(String token) {
         URI usersUri = UriComponentsBuilder
                 .fromHttpUrl(baseUrl)
                 .pathSegment("admin", "realms", realm, "users")
@@ -149,6 +151,69 @@ public class KeycloakAdminService {
                         KeycloakUserDto::getUsername,
                         String.CASE_INSENSITIVE_ORDER))
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Retourne uniquement les comptes activés possédant le rôle realm demandé.
+     * Les rôles sont vérifiés auprès de l'API Admin Keycloak côté serveur.
+     */
+    public List<KeycloakUserDto> getUsersWithRealmRole(
+            String requiredRole,
+            String excludedUsername) {
+
+        if (!"USER".equals(requiredRole) && !"ADMIN".equals(requiredRole)) {
+            throw new IllegalArgumentException("Unsupported recipient role");
+        }
+
+        String token = obtainAdminToken();
+        List<KeycloakUserDto> candidates = getUsers(token);
+        if (candidates.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<KeycloakUserDto> eligible = new java.util.ArrayList<>();
+
+        for (KeycloakUserDto user : candidates) {
+            if (!Boolean.TRUE.equals(user.getEnabled())
+                    || user.getUsername() == null
+                    || user.getId() == null) {
+                continue;
+            }
+
+            if (excludedUsername != null
+                    && excludedUsername.equalsIgnoreCase(user.getUsername())) {
+                continue;
+            }
+
+            URI rolesUri = UriComponentsBuilder
+                    .fromHttpUrl(baseUrl)
+                    .pathSegment(
+                            "admin", "realms", realm, "users",
+                            user.getId(), "role-mappings", "realm", "composite")
+                    .build()
+                    .encode()
+                    .toUri();
+
+            ResponseEntity<List> rolesResponse = restTemplate.exchange(
+                    rolesUri,
+                    HttpMethod.GET,
+                    new HttpEntity<>(bearerHeaders(token)),
+                    List.class
+            );
+
+            List<?> assignedRoles = rolesResponse.getBody();
+            boolean hasRequiredRole = assignedRoles != null
+                    && assignedRoles.stream()
+                    .filter(Map.class::isInstance)
+                    .map(item -> (Map<?, ?>) item)
+                    .anyMatch(role -> requiredRole.equals(role.get("name")));
+
+            if (hasRequiredRole) {
+                eligible.add(user);
+            }
+        }
+
+        return eligible;
     }
 
     private String obtainAdminToken() {

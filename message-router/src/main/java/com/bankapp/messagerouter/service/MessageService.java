@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -45,6 +46,17 @@ public class MessageService {
 
     public List<MessageDto> getMessagesForReceiver(String receiver) {
         return messageRepository.findByReceiver(receiver)
+                .stream()
+                .map(messageDtoConverter::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<MessageDto> getMessagesForUser(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            throw new AccessDeniedException("Authenticated username is missing");
+        }
+
+        return messageRepository.findByReceiverOrSender(username, username)
                 .stream()
                 .map(messageDtoConverter::toDto)
                 .collect(Collectors.toList());
@@ -95,6 +107,30 @@ public class MessageService {
                 .orElseThrow(() -> new MessageNotFoundException(
                         "Message with ID " + id + " not found"
                 ));
+
+        return messageDtoConverter.toDto(message);
+    }
+
+    public MessageDto getMessageByIdForUser(
+            Long id, String username, boolean isAdmin) {
+
+        Message message = messageRepository.findById(id)
+                .orElseThrow(() -> new MessageNotFoundException(
+                        "Message with ID " + id + " not found"
+                ));
+
+        if (!isAdmin) {
+            if (username == null || username.trim().isEmpty()) {
+                throw new AccessDeniedException("Authenticated username is missing");
+            }
+
+            boolean isSender = username.equals(message.getSender());
+            boolean isReceiver = username.equals(message.getReceiver());
+
+            if (!isSender && !isReceiver) {
+                throw new AccessDeniedException("Access denied to this message");
+            }
+        }
 
         return messageDtoConverter.toDto(message);
     }

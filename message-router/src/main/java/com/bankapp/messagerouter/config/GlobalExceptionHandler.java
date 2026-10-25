@@ -1,6 +1,7 @@
 package com.bankapp.messagerouter.config;
 
 import com.bankapp.messagerouter.error.MessageNotFoundException;
+import com.bankapp.messagerouter.error.RecipientDirectoryUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +60,16 @@ public class GlobalExceptionHandler {
         body.put("message", getExceptionMessage(ex));
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RecipientDirectoryUnavailableException.class)
+    public ResponseEntity<Map<String, Object>> handleRecipientDirectoryUnavailable(
+            RecipientDirectoryUnavailableException ex) {
+        log.warn("Recipient directory is unavailable");
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "Service Unavailable");
+        body.put("message", "Recipient validation is temporarily unavailable");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

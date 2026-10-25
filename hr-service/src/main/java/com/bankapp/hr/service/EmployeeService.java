@@ -29,6 +29,12 @@ public class EmployeeService {
         return keycloakAdminService.getUsers();
     }
 
+    public List<KeycloakUserDto> getMessageRecipients(
+            String role,
+            String currentUsername) {
+        return keycloakAdminService.getUsersWithRealmRole(role, currentUsername);
+    }
+
     @Transactional
     public List<EmployeeDto> getAllEmployees() {
         return employeeRepository.findByArchivedFalse()

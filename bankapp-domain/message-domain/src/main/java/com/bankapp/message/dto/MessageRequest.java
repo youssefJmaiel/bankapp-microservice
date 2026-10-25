@@ -18,7 +18,6 @@ public class MessageRequest {
     @Size(min = 1, max = 500, message = "Content must be between 1 and 500 characters")
     private String content;
 
-    @NotBlank(message = "Sender must not be blank")
     private String sender;
 
     @NotBlank(message = "Receiver must not be blank")

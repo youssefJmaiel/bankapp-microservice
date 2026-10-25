@@ -7,6 +7,7 @@ import com.bankapp.messagerouter.converter.MessageRequestConverter;
 import com.bankapp.messagerouter.entity.Message;
 import com.bankapp.messagerouter.error.MessageNotFoundException;
 import com.bankapp.messagerouter.repository.MessageRepository;
+import org.springframework.security.access.AccessDeniedException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -318,6 +319,103 @@ class MessageServiceTest {
 
         assertTrue(result.isEmpty());
         verify(messageRepository).findByReceiver("alice");
+    }
+
+    @Test
+    void getMessagesForUser_shouldReturnMessagesSentAndReceivedByUser() {
+        Message received = new Message();
+        received.setId(31L);
+        received.setContent("Received");
+        received.setSender("bob");
+        received.setReceiver("alice");
+
+        Message sent = new Message();
+        sent.setId(32L);
+        sent.setContent("Sent");
+        sent.setSender("alice");
+        sent.setReceiver("charlie");
+
+        when(messageRepository.findByReceiverOrSender("alice", "alice"))
+                .thenReturn(List.of(received, sent));
+
+        List<MessageDto> result = messageService.getMessagesForUser("alice");
+
+        assertEquals(2, result.size());
+        assertEquals("Received", result.get(0).getContent());
+        assertEquals("Sent", result.get(1).getContent());
+        verify(messageRepository).findByReceiverOrSender("alice", "alice");
+    }
+
+    @Test
+    void getMessagesForUser_shouldRejectBlankUsername() {
+        assertThrows(
+                AccessDeniedException.class,
+                () -> messageService.getMessagesForUser(" ")
+        );
+
+        verify(messageRepository, never())
+                .findByReceiverOrSender(anyString(), anyString());
+    }
+
+    @Test
+    void getMessageByIdForUser_shouldAllowSender() {
+        Message message = new Message();
+        message.setId(41L);
+        message.setContent("Private");
+        message.setSender("alice");
+        message.setReceiver("bob");
+
+        when(messageRepository.findById(41L)).thenReturn(Optional.of(message));
+
+        MessageDto result = messageService.getMessageByIdForUser(41L, "alice", false);
+
+        assertEquals("Private", result.getContent());
+    }
+
+    @Test
+    void getMessageByIdForUser_shouldAllowReceiver() {
+        Message message = new Message();
+        message.setId(42L);
+        message.setContent("Private");
+        message.setSender("alice");
+        message.setReceiver("bob");
+
+        when(messageRepository.findById(42L)).thenReturn(Optional.of(message));
+
+        MessageDto result = messageService.getMessageByIdForUser(42L, "bob", false);
+
+        assertEquals("Private", result.getContent());
+    }
+
+    @Test
+    void getMessageByIdForUser_shouldRejectNonParticipant() {
+        Message message = new Message();
+        message.setId(43L);
+        message.setContent("Private");
+        message.setSender("alice");
+        message.setReceiver("bob");
+
+        when(messageRepository.findById(43L)).thenReturn(Optional.of(message));
+
+        assertThrows(
+                AccessDeniedException.class,
+                () -> messageService.getMessageByIdForUser(43L, "charlie", false)
+        );
+    }
+
+    @Test
+    void getMessageByIdForUser_shouldAllowAdminWhoIsNotParticipant() {
+        Message message = new Message();
+        message.setId(44L);
+        message.setContent("Administrative view");
+        message.setSender("alice");
+        message.setReceiver("bob");
+
+        when(messageRepository.findById(44L)).thenReturn(Optional.of(message));
+
+        MessageDto result = messageService.getMessageByIdForUser(44L, "admin", true);
+
+        assertEquals("Administrative view", result.getContent());
     }
 
     @Test

@@ -1,0 +1,3 @@
+test:
+  config-server:
+    message: "BankApp Config Server fonctionne"

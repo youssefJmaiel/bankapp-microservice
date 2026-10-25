@@ -3,6 +3,7 @@ package com.bankapp.messagerouter.controller;
 import com.bankapp.message.dto.MessageDto;
 import com.bankapp.message.dto.MessageRequest;
 import com.bankapp.messagerouter.error.MessageNotFoundException;
+import com.bankapp.messagerouter.client.RecipientDirectoryClient;
 import com.bankapp.messagerouter.service.MessageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -38,6 +41,9 @@ class MessageControllerTest {
 
     @MockBean
     private MessageService messageService;
+
+    @MockBean
+    private RecipientDirectoryClient recipientDirectoryClient;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -93,7 +99,6 @@ class MessageControllerTest {
     // ---------------------- GET BY ID ----------------------
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     void getMessageById_shouldReturnMessage_whenFound()
             throws Exception {
 
@@ -103,26 +108,34 @@ class MessageControllerTest {
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        when(messageService.getMessageById(1L))
+        when(messageService.getMessageByIdForUser(1L, "alice", true))
                 .thenReturn(message);
 
-        mockMvc.perform(get("/api/message/1"))
+        mockMvc.perform(get("/api/message/1")
+                        .with(jwt().jwt(token -> token
+                                .claim("preferred_username", "alice")
+                                .claim("realm_access", Map.of(
+                                        "roles", List.of("ADMIN"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content")
-                        .value("Test Message"));
+                .andExpect(jsonPath("$.content").value("Test Message"));
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     void getMessageById_shouldReturnNotFound_whenMissing()
             throws Exception {
 
         doThrow(new MessageNotFoundException(
                 "Message with ID 999 not found"))
                 .when(messageService)
-                .getMessageById(999L);
+                .getMessageByIdForUser(999L, "alice", true);
 
-        mockMvc.perform(get("/api/message/999"))
+        mockMvc.perform(get("/api/message/999")
+                        .with(jwt().jwt(token -> token
+                                .claim("preferred_username", "alice")
+                                .claim("realm_access", Map.of(
+                                        "roles", List.of("ADMIN"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isNotFound());
     }
 
@@ -191,34 +204,100 @@ class MessageControllerTest {
     // ---------------------- SEND MESSAGE ----------------------
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    void sendMessage_shouldReturnCreated() throws Exception {
+    void sendMessage_shouldUseAuthenticatedSenderInsteadOfSpoofedSender()
+            throws Exception {
 
         MessageRequest request = MessageRequest.builder()
                 .content("Hello")
-                .sender("Alice")
-                .receiver("Bob")
+                .sender("mallory")
+                .receiver("bob")
                 .build();
 
         MessageDto response = MessageDto.builder()
                 .content("Hello")
-                .sender("Alice")
-                .receiver("Bob")
+                .sender("alice")
+                .receiver("bob")
                 .build();
 
+        when(recipientDirectoryClient.getEligibleRecipients("test-token"))
+                .thenReturn(List.of("bob"));
         when(messageService.sendMessage(any(MessageRequest.class)))
                 .thenReturn(response);
 
         mockMvc.perform(post("/api/message/send")
+                        .with(jwt().jwt(token -> token
+                                .tokenValue("test-token")
+                                .claim("preferred_username", "alice")
+                                .claim("realm_access", Map.of(
+                                        "roles", List.of("USER"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.content")
-                        .value("Hello"))
-                .andExpect(jsonPath("$.sender")
-                        .value("Alice"))
-                .andExpect(jsonPath("$.receiver")
-                        .value("Bob"));
+                .andExpect(jsonPath("$.content").value("Hello"))
+                .andExpect(jsonPath("$.sender").value("alice"))
+                .andExpect(jsonPath("$.receiver").value("bob"));
+
+        org.mockito.ArgumentCaptor<MessageRequest> captor =
+                org.mockito.ArgumentCaptor.forClass(MessageRequest.class);
+        org.mockito.Mockito.verify(messageService).sendMessage(captor.capture());
+        org.junit.jupiter.api.Assertions.assertEquals("alice", captor.getValue().getSender());
+        org.mockito.Mockito.verify(recipientDirectoryClient)
+                .getEligibleRecipients("test-token");
+    }
+
+    @Test
+    void sendMessage_shouldRejectRecipientNotInEligibleDirectory()
+            throws Exception {
+
+        MessageRequest request = MessageRequest.builder()
+                .content("Hello")
+                .sender("forged-sender")
+                .receiver("bob")
+                .build();
+
+        when(recipientDirectoryClient.getEligibleRecipients("test-token"))
+                .thenReturn(List.of("charlie"));
+
+        mockMvc.perform(post("/api/message/send")
+                        .with(jwt().jwt(token -> token
+                                .tokenValue("test-token")
+                                .claim("preferred_username", "alice")
+                                .claim("realm_access", Map.of(
+                                        "roles", List.of("USER"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+        org.mockito.Mockito.verify(messageService, org.mockito.Mockito.never())
+                .sendMessage(any(MessageRequest.class));
+    }
+
+    @Test
+    void sendMessage_shouldRejectTokenWithBothMessagingRoles()
+            throws Exception {
+
+        MessageRequest request = MessageRequest.builder()
+                .content("Hello")
+                .receiver("bob")
+                .build();
+
+        mockMvc.perform(post("/api/message/send")
+                        .with(jwt().jwt(token -> token
+                                .claim("preferred_username", "alice")
+                                .claim("realm_access", Map.of(
+                                        "roles", List.of("USER", "ADMIN"))))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER"),
+                                        new SimpleGrantedAuthority("ROLE_ADMIN")))
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+        org.mockito.Mockito.verify(recipientDirectoryClient, org.mockito.Mockito.never())
+                .getEligibleRecipients(any());
+        org.mockito.Mockito.verify(messageService, org.mockito.Mockito.never())
+                .sendMessage(any(MessageRequest.class));
     }
 
 
@@ -261,7 +340,7 @@ class MessageControllerTest {
     }
     @Test
     void getMyMessages_shouldUseAuthenticatedUsername() throws Exception {
-        when(messageService.getMessagesForReceiver("alice"))
+        when(messageService.getMessagesForUser("alice"))
                 .thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/messages/my")
@@ -272,7 +351,7 @@ class MessageControllerTest {
                 .andExpect(jsonPath("$").isArray());
 
         org.mockito.Mockito.verify(messageService)
-                .getMessagesForReceiver("alice");
+                .getMessagesForUser("alice");
     }
 
     @Test

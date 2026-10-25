@@ -1,0 +1,457 @@
+services:
+
+  # =====================================================
+  # =====================================================
+  # EUREKA
+  # =====================================================
+  discovery-server:
+    image: ghcr.io/youssefjmaiel/bankapp-discovery-server:sha-6e08bd6
+    container_name: bankapp-discovery
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8761/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+    ports:
+      - "8761:8761"
+    networks:
+      - bankapp
+
+  # =====================================================
+  # AUTH SERVICE
+  # =====================================================
+  auth-service:
+    image: ghcr.io/youssefjmaiel/bankapp-auth-service:sha-6e08bd6
+    container_name: bankapp-auth
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8080/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+    networks:
+      - bankapp
+
+  # =====================================================
+  # HR SERVICE
+  # =====================================================
+  hr-service:
+    image: ghcr.io/youssefjmaiel/bankapp-hr-service:sha-6e08bd6
+    container_name: bankapp-hr
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8083/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "8083:8083"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/bankapp
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: hr_schema
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_DEFAULT_SCHEMA: hr_schema
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+      KEYCLOAK_ADMIN_BASE_URL: http://keycloak-dev:8080
+      KEYCLOAK_ADMIN_REALM: spring-app
+      KEYCLOAK_ADMIN_CLIENT_ID: ${KEYCLOAK_ADMIN_CLIENT_ID}
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+    networks:
+      - bankapp
+
+  # =====================================================
+  # MISSION SERVICE
+  # =====================================================
+  mission-service:
+    image: ghcr.io/youssefjmaiel/bankapp-mission-service:sha-6e08bd6
+    container_name: bankapp-mission
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8084/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "8084:8084"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/bankapp
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: mission_schema
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_DEFAULT_SCHEMA: mission_schema
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+      MQ_HOST: ibm-mq
+      MQ_PORT: '1414'
+      MQ_QUEUE_MANAGER: QM1
+      MQ_CHANNEL: DEV.APP.SVRCONN
+      MQ_USER_IBM: ${MQ_USER_IBM}
+      MQ_PASSWORD_IBM: ${MQ_PASSWORD_IBM}
+      MQ_MISSION_ASSIGNED_QUEUE: MISSION.ASSIGNED
+      MISSION_NOTIFICATIONS_MQ_ENABLED: ${MISSION_NOTIFICATIONS_MQ_ENABLED:-false}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+    networks:
+      - bankapp
+
+  # =====================================================
+  # MESSAGE ROUTER
+  # =====================================================
+  message-router:
+    image: ghcr.io/youssefjmaiel/bankapp-message-router:sha-6e08bd6
+    container_name: bankapp-message-router
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8085/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "8085:8085"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      MQ_USER_IBM: ${MQ_USER_IBM}
+      MQ_PASSWORD_IBM: ${MQ_PASSWORD_IBM}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/bankapp
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: message_schema
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_DEFAULT_SCHEMA: message_schema
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+      - ibm-mq
+    networks:
+      - bankapp
+
+  # =====================================================
+  # PARTNER SERVICE
+  # =====================================================
+  bankapp-notification:
+    image: ghcr.io/youssefjmaiel/bankapp-notification:sha-6e08bd6
+    container_name: bankapp-notification
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8086/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8086:8086"
+    environment:
+      MAIL_USERNAME: '${MAIL_USERNAME:-}'
+      MAIL_PASSWORD: '${MAIL_PASSWORD:-}'
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      MAIL_HOST: '${MAIL_HOST:-smtp.gmail.com}'
+      MAIL_PORT: '${MAIL_PORT:-587}'
+      MAIL_SMTP_AUTH: '${MAIL_SMTP_AUTH:-true}'
+      MAIL_SMTP_STARTTLS: '${MAIL_SMTP_STARTTLS:-true}'
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+      MQ_HOST: ibm-mq
+      MQ_PORT: '1414'
+      MQ_QUEUE_MANAGER: QM1
+      MQ_CHANNEL: DEV.APP.SVRCONN
+      MQ_USER_IBM: ${MQ_USER_IBM}
+      MQ_PASSWORD_IBM: ${MQ_PASSWORD_IBM}
+      MQ_MISSION_ASSIGNED_QUEUE: MISSION.ASSIGNED
+    depends_on:
+      - discovery-server
+      - mailpit
+    networks:
+      - bankapp
+
+  partner-service:
+    image: ghcr.io/youssefjmaiel/bankapp-partner-service:sha-6e08bd6
+    container_name: bankapp-partner
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8087/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "8087:8087"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/bankapp
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: partner_schema
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_DEFAULT_SCHEMA: partner_schema
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+    networks:
+      - bankapp
+
+  # =====================================================
+  # ACCOUNT SERVICE
+  # =====================================================
+  account-service:
+    image: ghcr.io/youssefjmaiel/bankapp-account-service:sha-6e08bd6
+    container_name: bankapp-account
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8089/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "8089:8089"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/bankapp
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: account_schema
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_DEFAULT_SCHEMA: account_schema
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+    networks:
+      - bankapp
+
+  # =====================================================
+  # GATEWAY
+  # =====================================================
+  payment-service:
+    image: ghcr.io/youssefjmaiel/bankapp-payment-service:sha-6e08bd6
+    container_name: bankapp-payment
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8088/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "8088:8088"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/bankapp
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: payment_schema
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_DEFAULT_SCHEMA: payment_schema
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+    networks:
+      - bankapp
+
+  leave-service:
+    image: ghcr.io/youssefjmaiel/bankapp-leave-service:sha-6e08bd6
+    container_name: bankapp-leave
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8090/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "8090:8090"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/bankapp
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: leave_schema
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_DEFAULT_SCHEMA: leave_schema
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/spring-app
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+    networks:
+      - bankapp
+
+  # =====================================================
+  # AI SERVICE
+  # =====================================================
+  ai-service:
+    image: ghcr.io/youssefjmaiel/bankapp-ai-service:sha-6e08bd6
+    container_name: bankapp-ai
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8091/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "8091:8091"
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      KEYCLOAK_JWK_SET_URI: http://host.docker.internal:8081/realms/spring-app/protocol/openid-connect/certs
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen2.5:3b
+      ACCOUNT_SERVICE_BASE_URL: http://account-service:8089
+      PAYMENT_SERVICE_BASE_URL: http://payment-service:8088
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/bankapp
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: ai_schema
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_DEFAULT_SCHEMA: ai_schema
+      SPRING_LIQUIBASE_LIQUIBASE_SCHEMA: public
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+      - ollama
+    networks:
+      - bankapp
+
+  # =====================================================
+  # OLLAMA - LOCAL AI MODEL
+  # =====================================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: bankapp-ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - bankapp
+
+  gateway-service:
+    image: ghcr.io/youssefjmaiel/bankapp-gateway-service:sha-6e08bd6
+    container_name: bankapp-gateway
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8082/actuator/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "8082:8082"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - discovery-server
+      - hr-service
+      - mission-service
+      - message-router
+      - account-service
+      - payment-service
+      - leave-service
+    networks:
+      - bankapp
+
+  # =====================================================
+  # IBM MQ
+  # =====================================================
+  ibm-mq:
+    image: ibmcom/mq:latest
+    container_name: bankapp-ibm-mq
+    healthcheck:
+      test: ["CMD-SHELL", "dspmq -m QM1 -o status 2>/dev/null | grep -q 'STATUS(Running)'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "1414:1414"
+      - "9443:9443"
+    environment:
+      LICENSE: accept
+      MQ_QMGR_NAME: QM1
+      MQ_CONNAUTH_USE_HTP: "true"
+      MQ_APP_PASSWORD: ${MQ_APP_PASSWORD}
+    stdin_open: true
+    tty: true
+    restart: always
+    networks:
+      - bankapp
+
+  # =====================================================
+  # MAILPIT - LOCAL EMAIL TESTING
+  # =====================================================
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: bankapp-mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - bankapp
+
+# =====================================================
+# NETWORK
+# =====================================================
+volumes:
+  ollama_data:
+
+networks:
+  bankapp:
+    driver: bridge
