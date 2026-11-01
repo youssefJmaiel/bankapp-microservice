@@ -2646,3 +2646,30 @@ The CI pipeline builds and tests the project before publishing Docker
 images to GitHub Container Registry (GHCR).
 
 These checks help detect problems before deployment.
+
+
+## Beyond Source Code Protection: A Reality of Software Engineering
+
+Some organizations believe that their software is protected simply because it runs inside a private corporate environment, depends on internal infrastructure, or requires access to private repositories and configuration systems.
+
+However, restricting access to an execution environment does not necessarily make a software system technically impossible to understand or reproduce.
+
+An experienced software engineer who understands the application's architecture, service dependencies, configuration mechanisms, databases, authentication flows, messaging infrastructure, and deployment requirements may be able to reconstruct a working local environment from the technical resources they are legitimately authorized to access.
+
+This reveals an important distinction: **protecting access to a system is not the same as protecting the intellectual property and sensitive information behind it.**
+
+A system that cannot be launched locally after an employee leaves an organization may simply be poorly documented, tightly coupled to internal infrastructure, or dependent on undocumented operational knowledge. These conditions should not be mistaken for strong security.
+
+This does not justify copying or publishing an employer's source code. Company software, proprietary libraries, confidential configurations, credentials, customer information, and intellectual property remain subject to their respective ownership rights and contractual restrictions. Technical knowledge does not grant permission to reuse another organization's implementation.
+
+Instead, organizations should invest in genuine security, clear technical documentation, reproducible environments, controlled access, secure configuration management, and well-defined intellectual property policies.
+
+### The New Reality of Individual Engineering and AI
+
+AI-assisted development has made it possible for a single experienced engineer to understand complex architectures, accelerate implementation, automate testing, and build sophisticated applications with fewer resources than before.
+
+But AI does not eliminate the need for engineering judgment. Understanding an entire system requires knowledge of architecture, business logic, security, infrastructure, data consistency, integration, failure scenarios, and maintenance.
+
+The real competitive advantage is no longer simply having access to source code. It is having the technical ability to understand systems, make sound decisions, and build reliable solutions while respecting security and intellectual property rights.
+
+**A company's security should never depend on the assumption that nobody outside its environment can understand how its software works. Real protection comes from engineering, not obscurity.**
